@@ -1,6 +1,7 @@
 #include "../include/fstsp.h"
 #include "../include/common.h"
 #include "../include/solution.h"
+#include "../include/solution31.h"
 #include <filesystem>
 #include <chrono>
 #include <ilcplex/ilocplex.h>
@@ -2068,8 +2069,13 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
                         .setName((std::string("no_drone_case2_") + std::to_string(h)).c_str());
         }
 
-        // ---- Solve ----
+        // Create the CPLEX solver and solve the model
         IloCplex cplex(model);
+        // export model
+        //        cplex.exportModel("model2.lp");
+        //        exit(0);
+
+        // Set the config parameters
         if (cfg.screen_mode == 0 || cfg.screen_mode == 1)
         {
             cplex.setOut(env.getNullStream());
@@ -2078,116 +2084,196 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
         }
         if (cfg.tl > 0)
             cplex.setParam(IloCplex::Param::TimeLimit, cfg.tl);
+
         if (cfg.num_thread > 0)
             cplex.setParam(IloCplex::Param::Threads, cfg.num_thread);
 
-        auto t0 = std::chrono::high_resolution_clock::now();
+        // ================= SOLVE MODEL =================
+        auto startTime = std::chrono::high_resolution_clock::now();
         cplex.solve();
-        auto t1 = std::chrono::high_resolution_clock::now();
-        double solve_time = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count() / 1000.0;
+        auto endTime = std::chrono::high_resolution_clock::now();
+        auto duration =
+            std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-        double objv = cplex.getObjValue();
-        double gap = std::round(cplex.getMIPRelativeGap() * 10000.0) / 100.0;
-
-        // ==============================
-        // In lộ trình nếu cần
-        // ==============================
-        if (cfg.screen_mode >= 1 &&
-            (cplex.getStatus() == IloAlgorithm::Optimal ||
-             cplex.getStatus() == IloAlgorithm::Feasible))
+        // ================= EXTRACT SOLUTION =================
+        vector<int> truck_order;
+        vector<vector<int>> drone_order;
+        vector<vector<int>> jetsuite_order;
+        if (cfg.screen_mode >= 1)
         {
-            using std::cout;
-            using std::endl;
+            cout << "Solve time: " << duration.count() / 1000.0 << std::endl;
+            cout << "Objective Value: " << cplex.getObjValue() << std::endl;
+            cout << "\nTruck Schedule (no-stage): " << std::endl;
+        }
+        // ---------- Truck route (x[i][j]) ----------
+        vector<int> next_of(N + 1, -1);
 
-            // ---------- Truck route ----------
-            cout << "\n=== Truck route (from x_ij) ===\n";
-            std::vector<int> next_of(N + 1, -1);
-
-            for (int i : V)
+        for (int i : V)
+        {
+            for (int j : V)
             {
-                for (int j : V)
+                if (i == j)
+                    continue;
+
+                if (cplex.isExtracted(x[i][j]) &&
+                    cplex.getValue(x[i][j]) > 0.5)
                 {
-                    if (i == j)
-                        continue;
-                    if (cplex.isExtracted(x[i][j]) && cplex.getValue(x[i][j]) > 0.5)
-                    {
-                        next_of[i] = j;
-                        cout << "Truck arc: " << i << " -> " << j << "\n";
-                    }
+                    next_of[i] = j;
+
+                    if (cfg.screen_mode >= 3)
+                        cout << "Truck arc: " << i << " -> " << j << std::endl;
                 }
             }
+        }
 
-            cout << "Truck path: ";
-            int cur = S;
-            std::unordered_set<int> seen;
-            cout << cur;
-            while (true)
-            {
-                int nxt = (cur >= 0 && cur <= N) ? next_of[cur] : -1;
-                if (nxt < 0 || seen.count(nxt))
-                    break;
-                cout << " -> " << nxt;
-                seen.insert(nxt);
-                if (nxt == S)
-                    break; // quay về depot
-                cur = nxt;
-            }
-            cout << "\n";
+        // Build truck path S -> ... -> S
+        int cur = S;
+        std::unordered_set<int> seen;
 
-            // ---------- Drone sorties ----------
-            cout << "\n=== Drone sorties (i, j, u) ===\n";
-            bool anyDrone = false;
-            for (int i : V)
+        truck_order.push_back(cur);
+
+        while (true)
+        {
+            int nxt = next_of[cur];
+            if (nxt < 0 || seen.count(nxt))
+                break;
+
+            truck_order.push_back(nxt);
+            seen.insert(nxt);
+
+            if (nxt == S)
+                break;
+
+            cur = nxt;
+        }
+
+        if (cfg.screen_mode >= 1)
+        {
+            cout << "\nTruck path: ";
+            for (int v : truck_order)
+                cout << v << " ";
+            cout << std::endl;
+        }
+
+        // ---------- Drone sorties (i, j, u) ----------
+        for (int i : V)
+        {
+            for (int j : C)
             {
-                for (int j : C)
+                for (int u : V)
                 {
-                    for (int uNode : V)
+                    if (cplex.isExtracted(yD3[i][j][u]) &&
+                        cplex.getValue(yD3[i][j][u]) > 0.5)
                     {
-                        if (cplex.isExtracted(yD3[i][j][uNode]) &&
-                            cplex.getValue(yD3[i][j][uNode]) > 0.5)
+                        drone_order.push_back({i, j, u});
+
+                        if (cfg.screen_mode >= 1)
                         {
-                            anyDrone = true;
-                            cout << "Drone: launch at " << i
-                                 << ", serve customer " << j
-                                 << ", rendezvous at " << uNode << "\n";
+                            cout << "Drone: launch " << i
+                                 << ", serve " << j
+                                 << ", rendezvous " << u << std::endl;
+                            cout << "\t Departed at: " << cplex.getValue(a[i]) << "\n";
+                            cout << "\t Visited at: " << cplex.getValue(a[i] + tauD[i][j]) << "\n";
+                            cout << "\t Arrived at: "
+                                 << cplex.getValue(a[i] + tauD[i][j] + tauD[j][u] + tR) << "\n";
                         }
                     }
                 }
             }
-            if (!anyDrone)
-                cout << "(no drone sorties)\n";
-
-            // ---------- Jetsuite sorties ----------
-            cout << "\n=== Jetsuite sorties (i, k) ===\n";
-            bool anyJS = false;
-            for (int i : V)
-            {
-                for (int k : C)
-                {
-                    if (cplex.isExtracted(yJ[i][k]) &&
-                        cplex.getValue(yJ[i][k]) > 0.5)
-                    {
-                        anyJS = true;
-                        cout << "Jetsuite: launch at " << i
-                             << ", serve customer " << k
-                             << ", return to truck at node " << i << "\n";
-                    }
-                }
-            }
-            if (!anyJS)
-                cout << "(no jetsuite sorties)\n";
-            cout << endl;
         }
 
-        return Result{objv, solve_time, gap};
+        if (cfg.screen_mode >= 1 && drone_order.empty())
+            cout << "(no drone sorties)\n";
+
+        // ---------- Jetsuite sorties (i, h) ----------
+        for (int i : V)
+        {
+            for (int h : C)
+            {
+                if (cplex.isExtracted(yJ[i][h]) &&
+                    cplex.getValue(yJ[i][h]) > 0.5)
+                {
+                    // return to same node i
+                    jetsuite_order.push_back({i, h, i});
+
+                    if (cfg.screen_mode >= 1)
+                        cout << "Jetsuite: launch " << i
+                             << ", serve " << h
+                             << ", return " << i << std::endl;
+                }
+            }
+        }
+
+        if (cfg.screen_mode >= 1 && jetsuite_order.empty())
+            cout << "(no jetsuite sorties)\n";
+
+        // ---------- Debug dump (screen_mode >= 3) ----------
+        if (cfg.screen_mode >= 3)
+        {
+            cout << "\n=== x[i][j] ===\n";
+            for (int i : V)
+                for (int j : V)
+                    if (cplex.isExtracted(x[i][j]) &&
+                        cplex.getValue(x[i][j]) > 0.5)
+                        cout << "x[" << i << "][" << j << "] = "
+                             << cplex.getValue(x[i][j]) << std::endl;
+
+            cout << "\n=== yD3[i][j][u] ===\n";
+            for (int i : V)
+                for (int j : C)
+                    for (int u : V)
+                        if (cplex.isExtracted(yD3[i][j][u]) &&
+                            cplex.getValue(yD3[i][j][u]) > 0.5)
+                            cout << "yD3[" << i << "][" << j << "][" << u << "] = "
+                                 << cplex.getValue(yD3[i][j][u]) << std::endl;
+
+            cout << "\n=== yJ[i][h] ===\n";
+            for (int i : V)
+                for (int h : C)
+                    if (cplex.isExtracted(yJ[i][h]) &&
+                        cplex.getValue(yJ[i][h]) > 0.5)
+                        cout << "yJ[" << i << "][" << h << "] = "
+                             << cplex.getValue(yJ[i][h]) << std::endl;
+        }
+
+        // ================= CREATE SOLUTION =================
+        double obj = cplex.getObjValue();
+        double lowerBound = cplex.getBestObjValue();
+        double gap =
+            round(cplex.getMIPRelativeGap() * 10000.0) / 100.0;
+        double solve_time = duration.count() / 1000.0;
+
+        Solution31 solution31(
+            obj,
+            lowerBound,
+            gap,
+            solve_time,
+            instance,
+            &cfg,
+            truck_order,
+            drone_order,
+            jetsuite_order);
+
+        // ================= OUTPUT & CHECK =================
+        solution31.write();
+
+        if (cfg.is_check)
+        {
+            if (!solution31.isFeasible())
+                std::cerr << "WARNING: The instance "
+                          << instance->folder_path
+                          << " solves infeasible!\n";
+        }
+
+        return Result{obj, solve_time, gap};
     }
     catch (IloException &e)
     {
-        std::cerr << "Concert exception: " << e << std::endl;
+        std::cerr << "Concert exception caught: " << e << std::endl;
     }
     catch (...)
     {
-        std::cerr << "Unknown exception" << std::endl;
+        std::cerr << "Unknown exception caught" << std::endl;
     }
     return Result{-1, -1, -1};
 }

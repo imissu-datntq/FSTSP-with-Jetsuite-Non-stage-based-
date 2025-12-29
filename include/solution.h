@@ -53,6 +53,7 @@ public:
     void write();
     void write(const string &abs_path); // Add this line
     void print();                       // Add this line
+    void print_mode31();                // Add this line
     // Validation functions
     bool areCustomersVisited();
     bool isTimeTruckValid();
@@ -100,7 +101,7 @@ public:
 
         // Check feasibility of all elements
         if (!(areCustomersVisited() && isTimeTruckValid() && isTimeDroneValid() && isTimeJetsuiteValid() &&
-              isSynchronizeTime() && isSatisfyOtherConstraints()))
+            isSynchronizeTime() && isSatisfyOtherConstraints()))
         {
             is_feasible = false;
         }
@@ -112,6 +113,7 @@ public:
             return true;
         }
         return false;
+        
     }
 };
 

@@ -96,8 +96,10 @@ int main(int argc, char **argv)
         std::cout << "- Drone endurance = " << cfg.dtl << std::endl;
         std::cout << "- SL = " << cfg.sl << std::endl;
         std::cout << "- SR = " << cfg.sr << std::endl;
-        std::cout << "- Allow loop = " << cfg.allow_loop << std::endl;
-        std::cout << "- Allow revisit = " << cfg.allow_revisit << std::endl;
+        if (vm["mode"].as<int>() != 21 || vm["mode"].as<int>() != 31){
+            std::cout << "- Allow loop = " << cfg.allow_loop << std::endl;
+            std::cout << "- Allow revisit = " << cfg.allow_revisit << std::endl;
+        }
         std::cout << "- Allow multi-visit drone = " << cfg.allow_multi_visit_drone << std::endl;
         std::cout << "- Use TSP optimal solution as warmstart: = " << cfg.use_tsp_for_warmstart << std::endl;
         std::cout << "- Use cutting plane method: = " << cfg.use_cutting_plane << std::endl;

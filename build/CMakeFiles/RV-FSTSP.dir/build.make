@@ -44,10 +44,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /snap/cmake/1499/bin/cmake
+CMAKE_COMMAND = /snap/cmake/1507/bin/cmake
 
 # The command to remove a file.
-RM = /snap/cmake/1499/bin/cmake -E rm -f
+RM = /snap/cmake/1507/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -156,10 +156,24 @@ CMakeFiles/RV-FSTSP.dir/src/solution.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/RV-FSTSP.dir/src/solution.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/src/solution.cpp" -o CMakeFiles/RV-FSTSP.dir/src/solution.cpp.s
 
+CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o: CMakeFiles/RV-FSTSP.dir/flags.make
+CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o: /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM\ Lab/projects/src/solution31.cpp
+CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o: CMakeFiles/RV-FSTSP.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o -MF CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o.d -o CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o -c "/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/src/solution31.cpp"
+
+CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/src/solution31.cpp" > CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.i
+
+CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/src/solution31.cpp" -o CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.s
+
 CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o: CMakeFiles/RV-FSTSP.dir/flags.make
 CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o: /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM\ Lab/projects/src/rv-fstsp.cpp
 CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o: CMakeFiles/RV-FSTSP.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o -MF CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o.d -o CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o -c "/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/src/rv-fstsp.cpp"
 
 CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.i: cmake_force
@@ -173,7 +187,7 @@ CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.s: cmake_force
 CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o: CMakeFiles/RV-FSTSP.dir/flags.make
 CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o: /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM\ Lab/projects/src/CMSA.cpp
 CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o: CMakeFiles/RV-FSTSP.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o -MF CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o.d -o CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o -c "/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/src/CMSA.cpp"
 
 CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.i: cmake_force
@@ -192,6 +206,7 @@ RV__FSTSP_OBJECTS = \
 "CMakeFiles/RV-FSTSP.dir/src/other_method_solver.cpp.o" \
 "CMakeFiles/RV-FSTSP.dir/src/fstsp.cpp.o" \
 "CMakeFiles/RV-FSTSP.dir/src/solution.cpp.o" \
+"CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o" \
 "CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o" \
 "CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o"
 
@@ -204,6 +219,7 @@ RV-FSTSP: CMakeFiles/RV-FSTSP.dir/src/solver.cpp.o
 RV-FSTSP: CMakeFiles/RV-FSTSP.dir/src/other_method_solver.cpp.o
 RV-FSTSP: CMakeFiles/RV-FSTSP.dir/src/fstsp.cpp.o
 RV-FSTSP: CMakeFiles/RV-FSTSP.dir/src/solution.cpp.o
+RV-FSTSP: CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o
 RV-FSTSP: CMakeFiles/RV-FSTSP.dir/src/rv-fstsp.cpp.o
 RV-FSTSP: CMakeFiles/RV-FSTSP.dir/src/CMSA.cpp.o
 RV-FSTSP: CMakeFiles/RV-FSTSP.dir/build.make
@@ -216,7 +232,7 @@ RV-FSTSP: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.83.0
 RV-FSTSP: /usr/lib/x86_64-linux-gnu/libboost_regex.so.1.83.0
 RV-FSTSP: /usr/lib/x86_64-linux-gnu/libboost_atomic.so.1.83.0
 RV-FSTSP: CMakeFiles/RV-FSTSP.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable RV-FSTSP"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable RV-FSTSP"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/RV-FSTSP.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

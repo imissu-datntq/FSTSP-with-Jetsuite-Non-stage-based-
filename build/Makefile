@@ -48,10 +48,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /snap/cmake/1499/bin/cmake
+CMAKE_COMMAND = /snap/cmake/1507/bin/cmake
 
 # The command to remove a file.
-RM = /snap/cmake/1499/bin/cmake -E rm -f
+RM = /snap/cmake/1507/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -68,7 +68,7 @@ CMAKE_BINARY_DIR = "/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quoc
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running CMake cache editor..."
-	/snap/cmake/1499/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/snap/cmake/1507/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -78,7 +78,7 @@ edit_cache/fast: edit_cache
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running CMake to regenerate build system..."
-	/snap/cmake/1499/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/snap/cmake/1507/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -297,6 +297,30 @@ src/solution.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/RV-FSTSP.dir/build.make CMakeFiles/RV-FSTSP.dir/src/solution.cpp.s
 .PHONY : src/solution.cpp.s
 
+src/solution31.o: src/solution31.cpp.o
+.PHONY : src/solution31.o
+
+# target to build an object file
+src/solution31.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RV-FSTSP.dir/build.make CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.o
+.PHONY : src/solution31.cpp.o
+
+src/solution31.i: src/solution31.cpp.i
+.PHONY : src/solution31.i
+
+# target to preprocess a source file
+src/solution31.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RV-FSTSP.dir/build.make CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.i
+.PHONY : src/solution31.cpp.i
+
+src/solution31.s: src/solution31.cpp.s
+.PHONY : src/solution31.s
+
+# target to generate assembly for a file
+src/solution31.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/RV-FSTSP.dir/build.make CMakeFiles/RV-FSTSP.dir/src/solution31.cpp.s
+.PHONY : src/solution31.cpp.s
+
 src/solver.o: src/solver.cpp.o
 .PHONY : src/solver.o
 
@@ -351,6 +375,9 @@ help:
 	@echo "... src/solution.o"
 	@echo "... src/solution.i"
 	@echo "... src/solution.s"
+	@echo "... src/solution31.o"
+	@echo "... src/solution31.i"
+	@echo "... src/solution31.s"
 	@echo "... src/solver.o"
 	@echo "... src/solver.i"
 	@echo "... src/solver.s"

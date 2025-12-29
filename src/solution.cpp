@@ -652,6 +652,54 @@ void Solution::recalculateObjective()
     cost = std::max({tTruckEnd, tDroneEnd, tJetEnd});
 }
 
+void Solution::print_mode31()
+{
+    using std::cout;
+    using std::endl;
+
+    if (cost <= 0)
+    {
+        cout << "Can't print. The solution is infeasible\n";
+        return;
+    }
+
+    // ---------- Truck route ----------
+    cout << "\n=== Truck route (from x_ij) ===\n";
+    if (!truck_order.empty())
+    {
+        cout << "Truck path: ";
+        for (size_t i = 0; i < truck_order.size(); ++i)
+        {
+            if (i)
+                cout << " -> ";
+            cout << truck_order[i];
+        }
+        cout << endl;
+    }
+
+    // ---------- Drone sorties ----------
+    cout << "\n=== Drone sorties (i, j, u) ===\n";
+    if (drone_order.empty())
+        cout << "(no drone sorties)\n";
+    else
+        for (auto &d : drone_order)
+            cout << "Drone: launch at " << d[0]
+                 << ", serve customer " << d[1]
+                 << ", rendezvous at " << d[2] << "\n";
+
+    // ---------- Jetsuite sorties ----------
+    cout << "\n=== Jetsuite sorties (i, k) ===\n";
+    if (jetsuite_order.empty())
+        cout << "(no jetsuite sorties)\n";
+    else
+        for (auto &j : jetsuite_order)
+            cout << "Jetsuite: launch at " << j[0]
+                 << ", serve customer " << j[1]
+                 << ", return to truck at node " << j[0] << "\n";
+
+    cout << endl;
+}
+
 void Solution::print()
 {
     if (cost <= 0)

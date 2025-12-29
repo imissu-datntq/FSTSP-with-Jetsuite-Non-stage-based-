@@ -45,8 +45,11 @@ set (SOURCE_FILES
         src/fstsp.cpp
         include/cfg.h
         include/solution.h
+        include/solution31.h
         include/common.h
+        src/solver.cpp
         src/solution.cpp
+        src/solution31.cpp
         src/rv-fstsp.cpp
         src/CMSA.cpp
 )
