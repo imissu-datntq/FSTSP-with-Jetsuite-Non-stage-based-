@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     namespace po = boost::program_options;
     // Declare the supported options.
     po::options_description desc("Allowed options");
-    desc.add_options()("help", "produce help message")("input,i", po::value<string>()->required(), "Input file location")("output,o", po::value<string>()->default_value("skip"), "Output file location")("mode", po::value<int>()->default_value(3), "Solving mode. 33: CMSA + 3-index, 2: 2-index (no RV), 3: 3-index, 5: 5-index")("screen,s", po::value<int>()->default_value(2), "Screen option. (0: only notify if feasibility check failed, 1: results + check, 2: all)")("time,t", po::value<int>()->default_value(-1), "Time limit. Default is None")("thread", po::value<int>()->default_value(-1), "Number of threads")("dtl", po::value<double>()->default_value(9999), "Drone endurance")("sl", po::value<double>()->default_value(0), "Service time launching")("sr", po::value<double>()->default_value(0), "Service time recovering")("check", po::value<bool>()->default_value(true), "Is checking solution?")("revisit", po::value<bool>()->default_value(true), "Is allow revisit?")("loop", po::value<bool>()->default_value(true), "Is allow loop?")("test", po::value<int>()->default_value(0), "Test mode (3-index): 0 - normal, 1 - not tighten, 2 - z_{kk'}' = 0, k'-k >= 3")("debug,d", po::value<bool>()->default_value(false), "Enable detailed debug information")("jetsuit,j", po::value<bool>()->default_value(false), "Enable jetsuit usage");
+    desc.add_options()("help", "produce help message")("input,i", po::value<string>()->required(), "Input file location")("output,o", po::value<string>()->default_value("skip"), "Output file location")("mode", po::value<int>()->default_value(3), "Solving mode. 33: CMSA + 3-index, 2: 2-index (no RV), 3: 3-index, 5: 5-index")("screen,s", po::value<int>()->default_value(2), "Screen option. (0: only notify if feasibility check failed, 1: results + check, 2: all)")("time,t", po::value<int>()->default_value(-1), "Time limit. Default is None")("thread", po::value<int>()->default_value(-1), "Number of threads")("dtl", po::value<double>()->default_value(9999), "Drone endurance")("sl", po::value<double>()->default_value(0), "Service time launching")("sr", po::value<double>()->default_value(0), "Service time recovering")("check", po::value<bool>()->default_value(true), "Is checking solution?")("revisit", po::value<bool>()->default_value(true), "Is allow revisit?")("loop", po::value<bool>()->default_value(true), "Is allow loop?")("test", po::value<int>()->default_value(0), "Test mode (3-index): 0 - normal, 1 - not tighten, 2 - z_{kk'}' = 0, k'-k >= 3")("debug,d", po::value<bool>()->default_value(false), "Enable detailed debug information")("jetsuit,j", po::value<bool>()->default_value(true), "Enable jetsuit usage");
 
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -72,19 +72,8 @@ int main(int argc, char **argv)
     // =====================================================
     int mode = vm["mode"].as<int>();
 
-    // Mặc định: không dùng JetSuite
-    cfg.jetsuite_enabled = false;
-
-    // Các mode MIP sử dụng JetSuite
-    if (mode == 21 || mode == 31)
-    {
-        cfg.jetsuite_enabled = true;
-    }
-    // CMSA (mode 33) dùng flag từ dòng lệnh --jetsuit
-    else if (mode == 33)
-    {
-        cfg.jetsuite_enabled = vm["jetsuit"].as<bool>();
-    }
+    // Tất cả mode đều dùng flag từ dòng lệnh --jetsuit
+    cfg.jetsuite_enabled = vm["jetsuit"].as<bool>();
 
     if (cfg.screen_mode >= 2)
     {
@@ -96,7 +85,8 @@ int main(int argc, char **argv)
         std::cout << "- Drone endurance = " << cfg.dtl << std::endl;
         std::cout << "- SL = " << cfg.sl << std::endl;
         std::cout << "- SR = " << cfg.sr << std::endl;
-        if (vm["mode"].as<int>() != 21 || vm["mode"].as<int>() != 31){
+        if (vm["mode"].as<int>() != 21 || vm["mode"].as<int>() != 31)
+        {
             std::cout << "- Allow loop = " << cfg.allow_loop << std::endl;
             std::cout << "- Allow revisit = " << cfg.allow_revisit << std::endl;
         }

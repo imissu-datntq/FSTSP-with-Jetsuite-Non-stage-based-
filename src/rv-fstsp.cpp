@@ -1884,6 +1884,39 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
 
         // ---- Drone (3-index) ----
         // Waiting time wD_iju và endurance như Case 2 trong PDF
+
+        // Drone real launch time (B2)
+        IloArray<IloArray<IloNumVarArray>> tLaunch(env, N + 1);
+        for (int i : V)
+        {
+            tLaunch[i] = IloArray<IloNumVarArray>(env, N + 1);
+            for (int j : C)
+            {
+                tLaunch[i][j] = IloNumVarArray(env, N + 1, 0, IloInfinity, ILOFLOAT);
+                for (int uNode : V)
+                {
+                    std::stringstream nm;
+                    nm << "tLaunch_" << i << "_" << j << "_" << uNode;
+                    tLaunch[i][j][uNode].setName(nm.str().c_str());
+                }
+            }
+        }
+
+        for (int i : V)
+            for (int j : C)
+                for (int uNode : V)
+                {
+                    // tLaunch >= a[i]  nếu yD3 = 1
+                    model.add(
+                             tLaunch[i][j][uNode] >= a[i] - M * (1 - yD3[i][j][uNode]))
+                        .setName(("launch_lb_" + std::to_string(i) + "_" + std::to_string(j) + "_" + std::to_string(uNode)).c_str());
+
+                    // tLaunch <= d[i] nếu yD3 = 1
+                    model.add(
+                             tLaunch[i][j][uNode] <= d[i] + M * (1 - yD3[i][j][uNode]))
+                        .setName(("launch_ub_" + std::to_string(i) + "_" + std::to_string(j) + "_" + std::to_string(uNode)).c_str());
+                }
+
         for (int i : V)
             for (int j : C)
                 for (int uNode : V)
@@ -1894,21 +1927,15 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
 
                     // (31) wD_iju >= a[u] - (a[i] + tL + τ'ij + τ'ju) - M(1 - yD3_iju)
                     //     (drone đến u sớm, phải chờ truck)
+                    // wD_iju >= a[u] - (tLaunch + tL + τ'ij + τ'ju)
                     {
                         IloExpr e(env);
-                        e += a[uNode] - (a[i] + tL + tauD[i][j] + tauD[j][uNode]) - M * (1 - yD3[i][j][uNode]);
+                        e += a[uNode] - (tLaunch[i][j][uNode] + tL + tauD[i][j] + tauD[j][uNode]) - M * (1 - yD3[i][j][uNode]);
                         model.add(wD[i][j][uNode] >= e)
-                            .setName(("dr_wait_def_" + std::to_string(i) + "_" + std::to_string(j) + "_" + std::to_string(uNode)).c_str());
+                            .setName(("dr_wait_def_B2_" + std::to_string(i) + "_" +
+                                      std::to_string(j) + "_" + std::to_string(uNode))
+                                         .c_str());
                         e.end();
-                    }
-
-                    // (33) (τ'ij + τ'ju + tR) * yD3_iju + wD_iju <= E_d
-                    {
-                        IloExpr e2(env);
-                        e2 += (tauD[i][j] + tauD[j][uNode] + tR) * yD3[i][j][uNode] + wD[i][j][uNode];
-                        model.add(e2 <= E_d)
-                            .setName(("dr_end_case2_" + std::to_string(i) + "_" + std::to_string(j) + "_" + std::to_string(uNode)).c_str());
-                        e2.end();
                     }
                 }
 
@@ -1926,7 +1953,7 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
                 .setName(("wait_jetsuite_" + std::to_string(i)).c_str());
             expr.end();
         }
-
+        // at most 1 launch per i
         for (int i : V)
         {
             IloExpr sum(env);
@@ -1946,6 +1973,28 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
             model.add(sum <= 1).setName(("dr_retrieve_cap_" + std::to_string(uNode)).c_str());
             sum.end();
         }
+
+        // mỗi node chỉ được launch OR retrieve
+        for (int k : V)
+        {
+            IloExpr expr(env);
+
+            // launch at k
+            for (int j : C)
+                for (int u : V)
+                    expr += yD3[k][j][u];
+
+            // retrieve at k
+            for (int i : V)
+                for (int j : C)
+                    expr += yD3[i][j][k];
+
+            model.add(expr <= 1)
+                .setName(("dr_launch_or_retrieve_" + std::to_string(k)).c_str());
+
+            expr.end();
+        }
+
         // can launch/retrieve only if truck visits i/u
         for (int i : V)
         {
@@ -1980,13 +2029,20 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
                 for (int uNode : V)
                 {
                     IloExpr e1(env);
-                    e1 += a[i] + tL + tauD[i][j] + tauD[j][uNode] + tR - M * (1 - yD3[i][j][uNode]);
-                    model.add(d[uNode] >= e1).setName(("dr_sync_d_" + std::to_string(i) + "_" + std::to_string(j) + "_" + std::to_string(uNode)).c_str());
+                    e1 += tLaunch[i][j][uNode] + tL + tauD[i][j] + tauD[j][uNode] + tR - M * (1 - yD3[i][j][uNode]);
+                    model.add(d[uNode] >= e1)
+                        .setName(("dr_sync_d_B2_" + std::to_string(i) + "_" +
+                                  std::to_string(j) + "_" +
+                                  std::to_string(uNode))
+                                     .c_str());
                     e1.end();
 
                     IloExpr e2(env);
-                    e2 += a[i] + tL + tauD[i][j] + tauD[j][uNode] - M * (1 - yD3[i][j][uNode]);
-                    model.add(a[uNode] >= e2).setName(("dr_sync_a_" + std::to_string(i) + "_" + std::to_string(j) + "_" + std::to_string(uNode)).c_str());
+                    e2 += tLaunch[i][j][uNode] + tL + tauD[i][j] + tauD[j][uNode] - M * (1 - yD3[i][j][uNode]);
+                    model.add(a[uNode] >= e2)
+                        .setName(("dr_sync_a_B2_" + std::to_string(i) + "_" +
+                                  std::to_string(j) + "_" + std::to_string(uNode))
+                                     .c_str());
                     e2.end();
                 }
         // forbid retrieve == launch; forbid serving own launch index
@@ -1997,6 +2053,80 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
             if (C.count(i))
                 for (int uNode : V)
                     model.add(yD3[i][i][uNode] == 0);
+
+        // [ADD NEW] Biến luồng trạng thái: phi[i][j] = 1 nếu trên cung đường truck i->j đang có drone bay
+        IloArray<IloNumVarArray> phi(env, N + 1);
+        for (int i : V)
+        {
+            phi[i] = IloNumVarArray(env, N + 1, 0, 1, ILOFLOAT); // 0 <= phi <= 1
+            for (int j : V)
+            {
+                std::stringstream nm;
+                nm << "phi_" << i << "_" << j;
+                phi[i][j].setName(nm.str().c_str());
+            }
+        }
+
+        // [CONSTRAINT 1] Flow chỉ tồn tại nếu Truck đi qua cung đường đó
+        for (int i : V)
+        {
+            for (int j : V)
+            {
+                if (i != j)
+                {
+                    model.add(phi[i][j] <= x[i][j]).setName((std::string("phi_on_x_") + std::to_string(i) + "_" + std::to_string(j)).c_str());
+                }
+            }
+        }
+
+        // [CONSTRAINT 2] Flow Balance (Bảo toàn luồng)
+        // Tổng phi đi ra - Tổng phi đi vào = (Launch tại i) - (Retrieve tại i)
+        // Nếu i phóng drone: Launch=1, Retrieve=0 => Out - In = 1 (Bắt đầu trạng thái bay)
+        // Nếu i đón drone: Launch=0, Retrieve=1 => Out - In = -1 (Kết thúc trạng thái bay)
+        // Nếu i là node trung gian: Out - In = 0 (Duy trì trạng thái)
+
+        for (int i : V)
+        {
+            IloExpr flowOut(env);
+            for (int j : V)
+                if (i != j)
+                    flowOut += phi[i][j];
+
+            IloExpr flowIn(env);
+            for (int j : V)
+                if (i != j)
+                    flowIn += phi[j][i];
+
+            IloExpr launch_i(env);
+            for (int j : C)
+            {
+                for (int uNode : V)
+                {
+                    launch_i += yD3[i][j][uNode];
+                }
+            }
+
+            IloExpr retrieve_i(env);
+            for (int k : V)
+            {
+                for (int j : C)
+                {
+                    retrieve_i += yD3[k][j][i];
+                }
+            }
+
+            model.add(flowOut - flowIn == launch_i - retrieve_i)
+                .setName((std::string("drone_flow_balance_") + std::to_string(i)).c_str());
+
+            flowOut.end();
+            flowIn.end();
+            launch_i.end();
+            retrieve_i.end();
+        }
+
+        // [ADDITIONAL] Loại bỏ biến phi tại các cung tự loop (nếu cần)
+        for (int i : V)
+            model.add(phi[i][i] == 0);
 
         // ---- JetSuite ----
         for (int k : C)
@@ -2172,10 +2302,11 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
                             cout << "Drone: launch " << i
                                  << ", serve " << j
                                  << ", rendezvous " << u << std::endl;
-                            cout << "\t Departed at: " << cplex.getValue(a[i]) << "\n";
-                            cout << "\t Visited at: " << cplex.getValue(a[i] + tauD[i][j]) << "\n";
+                            double tL_real = cplex.getValue(tLaunch[i][j][u]);
+                            cout << "\t Departed at: " << tL_real << "\n";
+                            cout << "\t Visited at: " << tL_real + tauD[i][j] << "\n";
                             cout << "\t Arrived at: "
-                                 << cplex.getValue(a[i] + tauD[i][j] + tauD[j][u] + tR) << "\n";
+                                 << tL_real + tauD[i][j] + tauD[j][u] + tR << "\n";
                         }
                     }
                 }
@@ -2255,6 +2386,9 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
             jetsuite_order);
 
         // ================= OUTPUT & CHECK =================
+        if (cfg.screen_mode >= 1)
+            solution31.print_mode31();
+
         solution31.write();
 
         if (cfg.is_check)
