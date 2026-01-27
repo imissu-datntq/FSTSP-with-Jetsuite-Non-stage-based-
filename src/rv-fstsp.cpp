@@ -1736,6 +1736,25 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
             }
         }
 
+        // Khai báo biến z[i][k][j] (i: node, k: jet customer, j: drone customer)
+        // Lưu ý: LaTeX ghi z_{ikj} với k là khách Jet, j là khách Drone (cần check kỹ ngữ cảnh LaTeX)
+        // Giả sử logic là: Tại nút i, có Jet phục vụ k và Drone phục vụ j
+        IloArray<IloArray<IloBoolVarArray>> z(env, N + 1);
+        for (int i : V)
+        {
+            z[i] = IloArray<IloBoolVarArray>(env, N + 1);
+            for (int k : C)
+            { // Khách Jet
+                z[i][k] = IloBoolVarArray(env, N + 1);
+                for (int j : C)
+                { // Khách Drone
+                    std::stringstream nm;
+                    nm << "z_" << i << "_" << k << "_" << j;
+                    z[i][k][j] = IloBoolVar(env, nm.str().c_str());
+                }
+            }
+        }
+
         // Drone 3-index yD3_iju  [NEW]
         IloArray<IloArray<IloBoolVarArray>> yD3(env, N + 1);
         for (int i : V)
@@ -1806,19 +1825,22 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
 
         // ---- Objective (Mode 31 mimic Mode 3: minimize truck completion time) ----
 
-        // Biến makespan của truck: thời điểm rời node muộn nhất
-        IloNumVar T_end(env, 0.0, IloInfinity, ILOFLOAT);
-        T_end.setName("T_end");
+        // 1. Khai báo biến mục tiêu (tương đương d[K] trong Mode 3)
+        IloNumVar Makespan(env, 0.0, IloInfinity, ILOFLOAT);
+        Makespan.setName("Makespan_At_Depot");
 
-        // T_end >= d[i] cho mọi node i mà truck ghé
-        for (int i : V)
+        // 2. Ràng buộc để bắt "Makespan" phải lớn hơn hoặc bằng thời gian về kho
+        // Duyệt qua tất cả các nút i có thể là điểm cuối cùng trước khi về kho
+        for (int i : C)
         {
-            model.add(T_end >= d[i])
-                .setName((std::string("Tend_ge_d_") + std::to_string(i)).c_str());
+            IloExpr arrivalAtDepot(env);
+            arrivalAtDepot += d[i] + instance->tau[i][0];
+            model.add(Makespan >= arrivalAtDepot).setName((std::string("Calc_Makespan_") + std::to_string(i)).c_str());
+            arrivalAtDepot.end();
         }
 
-        // Minimize thời điểm hoàn thành của truck
-        model.add(IloMinimize(env, T_end));
+        // 3. Thiết lập hàm mục tiêu
+        model.add(IloMinimize(env, Makespan));
 
         // ---- Truck route ----
         {
@@ -1939,6 +1961,26 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
                     }
                 }
 
+        // --Ràng buộc (15): Năng lượng Drone ---
+        for (int i : V)
+        {
+            for (int j : C)
+            {
+                for (int uNode : V)
+                {
+                    // Tổng thời gian = Bay đi + Bay về + Thu hồi (tR) + Chờ (wD)
+                    IloExpr flightTime(env);
+                    flightTime += (tauD[i][j] + tauD[j][uNode] + tR) * yD3[i][j][uNode];
+                    flightTime += wD[i][j][uNode];
+
+                    // Phải nhỏ hơn E_d (dtl)
+                    model.add(flightTime <= E_d)
+                        .setName((std::string("Dr_Endurance_") + std::to_string(i) + "_" + std::to_string(j) + "_" + std::to_string(uNode)).c_str());
+                    flightTime.end();
+                }
+            }
+        }
+
         // Truck waiting time must accommodate JetSuite sorties (mode 31)
         for (int i : V)
         {
@@ -2045,10 +2087,7 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
                                      .c_str());
                     e2.end();
                 }
-        // forbid retrieve == launch; forbid serving own launch index
-        for (int i : V)
-            for (int j : C)
-                model.add(yD3[i][j][i] == 0);
+        // Loại bỏ yD3 tại các cung tự loop (nếu cần)
         for (int i : V)
             if (C.count(i))
                 for (int uNode : V)
@@ -2127,6 +2166,38 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
         // [ADDITIONAL] Loại bỏ biến phi tại các cung tự loop (nếu cần)
         for (int i : V)
             model.add(phi[i][i] == 0);
+
+        // // --- [SỬA] Ràng buộc (25) & (26): Phối hợp JetSuite & Drone ---
+        // for (int i : V)
+        // {
+        //     for (int k : C)
+        //     { // Khách của JetSuite
+        //         for (int j : C)
+        //         { // Khách của Drone
+        //             if (k == j)
+        //                 continue; // Một khách không thể vừa được Jet vừa được Drone phục vụ cùng lúc
+
+        //             // Tìm biến yD tương ứng (Drone phục vụ j, phóng từ i).
+        //             // Lưu ý: Drone phóng từ i có thể thu hồi tại bất kỳ u nào => Phải tính tổng yD3[i][j][u]
+        //             IloExpr sum_yD_launch_i(env);
+        //             for (int u : V)
+        //                 sum_yD_launch_i += yD3[i][j][u];
+
+        //             // (25) Logic liên kết z
+        //             model.add(z[i][k][j] <= yJ[i][k]);
+        //             model.add(z[i][k][j] <= sum_yD_launch_i);
+        //             model.add(sum_yD_launch_i + yJ[i][k] - z[i][k][j] <= 1);
+
+        //             // (26) Joint Endurance (Tổng thời gian Jet + Drone xử lý tại i phải khả thi)
+        //             // Ràng buộc này đảm bảo Truck chờ đủ lâu tại i cho cả 2 phương tiện
+        //             // Trong LaTeX: tổng thời gian <= min(EJ, Ed).
+        //             // Tùy chỉnh logic này dựa trên công thức (26) chính xác của bạn.
+        //             model.add(z[i][k][j] * (2.0 * tauJ[i][k] + tJR) <= std::min(E_J, E_d));
+
+        //             sum_yD_launch_i.end();
+        //         }
+        //     }
+        // }
 
         // ---- JetSuite ----
         for (int k : C)
