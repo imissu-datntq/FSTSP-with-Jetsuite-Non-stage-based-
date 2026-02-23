@@ -1,0 +1,165 @@
+mode: 31, sl: 0, sr: 0, revisit: 1, loop: 1
+Jetsuite speed factor: 7.84
+Solving mode: 31-indexed base
+Solving mode: 31-indexed base
+Instance name: /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/Niels_instances/output_with_jetsuite//uniform-alpha_3-55-n10-maxradius-100.txt
+---------------------------------------------------------------
+Current config:
+- Number of threads = -1
+- Drone endurance = 9999
+- SL = 0
+- SR = 0
+- Allow loop = 1
+- Allow revisit = 1
+- Allow multi-visit drone = 0
+- Use TSP optimal solution as warmstart: = 0
+- Use cutting plane method: = 0
+- Use CPLEX conflict refiner: = 0
+- Debug info: = 0
+- Jetsuit enabled: = 1
+---------------------------------------------------------------
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+Tried aggregator 2 times.
+MIP Presolve eliminated 3671 rows and 1008 columns.
+MIP Presolve modified 2160 coefficients.
+Aggregator did 585 substitutions.
+Reduced MIP has 2653 rows, 1437 columns, and 12966 nonzeros.
+Reduced MIP has 738 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (41.70 ticks)
+Found incumbent of value 704.438135 after 0.02 sec. (48.46 ticks)
+Probing time = 0.01 sec. (5.53 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 2653 rows, 1437 columns, and 12966 nonzeros.
+Reduced MIP has 738 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (7.14 ticks)
+Probing time = 0.00 sec. (5.42 ticks)
+Clique table members: 6941.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 20 threads.
+Root relaxation solution time = 0.01 sec. (7.92 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          704.4381      124.0326            82.39%
+      0     0      124.0326    29      704.4381      124.0326      137   82.39%
+*     0+    0                          514.8580      124.0326            75.91%
+      0     0      124.0326    21      514.8580      Cuts: 12      194   75.91%
+      0     0      124.0326    23      514.8580      Cuts: 66      270   75.91%
+      0     0      124.0326    12      514.8580      Cuts: 11      278   75.91%
+      0     0      124.0326    18      514.8580      Cuts: 27      332   75.91%
+*     0+    0                          410.7516      124.0326            69.80%
+*     0+    0                          374.7921      124.0326            66.91%
+Detecting symmetries...
+      0     2      124.0326     9      374.7921      124.0326      332   66.91%
+Elapsed time = 0.20 sec. (283.39 ticks, tree = 0.02 MB, solutions = 4)
+*    11+    1                          372.5782      124.0326            66.71%
+*    17+    3                          350.2791      124.0326            64.59%
+*    27+    5                          345.6706      124.0326            64.12%
+*    70+    8                          337.9679      124.0326            63.30%
+*   225+   60                          315.8205      124.0326            60.73%
+*   251   148      integral     0      310.4573      124.0326     4155   60.05%
+*   846+  342                          304.6720      124.0326            59.29%
+   2696  1948        cutoff            304.6720      124.0326    38829   59.29%
+*  2958+ 2101                          299.6796      124.0326            58.61%
+*  3104+ 2123                          297.3473      124.0326            58.29%
+*  3410+ 2252                          287.9149      124.0326            56.92%
+*  4635+ 3016                          280.8327      124.0326            55.83%
+   5024  3358      124.0326    14      280.8327      124.0326   106163   55.83%
+   7112  4429      124.0326    16      280.8327      124.0326   177131   55.83%
+*  7186+ 3291                          274.0710      124.0326            54.74%
+*  8415+ 3292                          272.0565      124.0326            54.41%
+*  9067+ 3292                          270.1177      124.0326            54.08%
+   9199  5356      124.0326    11      270.1177      124.0326   234876   54.08%
+*  9261+ 3292                          259.4574      124.0326            52.20%
+*  9841+ 3292                          253.7472      124.0326            51.12%
+  11025  6119      128.3179    27      253.7472      124.0326   292595   51.12%
+* 11206+ 3292                          249.6456      124.0326            50.32%
+
+Performing restart 1
+
+Repeating presolve.
+Tried aggregator 1 time.
+MIP Presolve eliminated 618 rows and 77 columns.
+MIP Presolve modified 1382 coefficients.
+Reduced MIP has 2035 rows, 1360 columns, and 11010 nonzeros.
+Reduced MIP has 738 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (5.36 ticks)
+Tried aggregator 1 time.
+MIP Presolve modified 2016 coefficients.
+Reduced MIP has 2035 rows, 1360 columns, and 11010 nonzeros.
+Reduced MIP has 738 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (6.57 ticks)
+Represolve time = 0.02 sec. (33.61 ticks)
+* 11707+    0                          235.8550      124.0326            47.41%
+  11707     0      124.0326    14      235.8550       Cuts: 8   333712   47.41%
+  11707     0      124.0326    20      235.8550      Cuts: 48   333850   47.41%
+  11707     0      124.0326    30      235.8550   Impl Bds: 5   334007   47.41%
+  11707     0      124.0326    19      235.8550      Cuts: 26   334039   47.41%
+  11707     0      124.0326    29      235.8550      Cuts: 46   334159   47.41%
+  11707     2      124.0326    13      235.8550      124.0326   334159   47.41%
+* 11910+    6                          235.0481      124.0326            47.23%
+  12146    27        cutoff            235.0481      124.0326   344464   47.23%
+* 12597    36      integral     0      231.7917      124.0326   356315   46.49%
+  12778    11        cutoff            231.7917      124.0326   367591   46.49%
+* 12779+   15                          226.6656      124.0326            45.28%
+  13035    16      181.6750    15      226.6656      124.0326   373962   45.28%
+  14565    24        cutoff            226.6656      124.0326   439686   45.28%
+Elapsed time = 3.20 sec. (4080.09 ticks, tree = 0.02 MB, solutions = 34)
+* 14675    14      integral     0      222.5882      124.0326   453977   44.28%
+
+GUB cover cuts applied:  1
+Cover cuts applied:  6
+Implied bound cuts applied:  78
+Flow cuts applied:  21
+Mixed integer rounding cuts applied:  16
+Zero-half cuts applied:  2
+Lift and project cuts applied:  1
+
+Root node processing (before b&c):
+  Real time             =    0.19 sec. (283.04 ticks)
+Parallel b&c, 20 threads:
+  Real time             =    3.25 sec. (4445.99 ticks)
+  Sync time (average)   =    1.43 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    3.44 sec. (4729.03 ticks)
+Solve time: 3.445
+Objective Value: 222.588
+
+Truck Schedule (no-stage): 
+
+Truck path: 0 8 9 7 3 0 
+Drone: launch 0, serve 1, rendezvous 8
+	 Departed at: 0
+	 Visited at: 34.7397
+	 Arrived at: 56.3268
+Drone: launch 9, serve 4, rendezvous 3
+	 Departed at: 97.0939
+	 Visited at: 126.863
+	 Arrived at: 159.448
+Jetsuite: launch 7, serve 5, return 7
+Jetsuite: launch 8, serve 2, return 8
+Jetsuite: launch 9, serve 6, return 9
+
+========== SOLUTION (MODE 31 – CASE 2) ==========
+Truck route:
+  0 8 9 7 3 0 
+Drone tasks (launch i -> customer j -> rendezvous u):
+  0 -> 1 -> 8
+  9 -> 4 -> 3
+JetSuite tasks (i -> k -> i):
+  7 -> 5 -> 7
+  8 -> 2 -> 8
+  9 -> 6 -> 9
+Makespan: 222.588
+===============================================
+Time schedule is not given, recalculating...
+Output is written to /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/output//uniform-alpha_3-55-n10-maxradius-100.csv
+
+Checking feasibility of the solution (MODE 31 – Case 2, no-stage)...
+Using objective value from CPLEX: 222.588
+(Skipping recalculation check - timing may exclude waiting time)
+The solution is FEASIBLE (MODE 31)

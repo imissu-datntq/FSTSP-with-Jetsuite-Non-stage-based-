@@ -1,0 +1,184 @@
+mode: 3, sl: 0, sr: 0, revisit: 1, loop: 1
+Jetsuite speed factor: 5.84
+Solving mode: 3-indexed base
+Solving mode: 3-indexed base
+Instance name: /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/Niels_instances/output_with_jetsuite//uniform-alpha_3-58-n10-maxradius-100.txt
+---------------------------------------------------------------
+Current config:
+- Number of threads = -1
+- Drone endurance = 9999
+- SL = 0
+- SR = 0
+- Allow loop = 1
+- Allow revisit = 1
+- Allow multi-visit drone = 0
+- Use TSP optimal solution as warmstart: = 0
+- Use cutting plane method: = 0
+- Use CPLEX conflict refiner: = 0
+- Debug info: = 0
+- Jetsuit enabled: = 1
+---------------------------------------------------------------
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+Tried aggregator 2 times.
+MIP Presolve eliminated 1114 rows and 2171 columns.
+MIP Presolve modified 1415 coefficients.
+Aggregator did 9 substitutions.
+Reduced MIP has 1249 rows, 3780 columns, and 30893 nonzeros.
+Reduced MIP has 3760 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (44.34 ticks)
+Found incumbent of value 91349.603996 after 0.03 sec. (67.93 ticks)
+Probing fixed 54 vars, tightened 18 bounds.
+Probing changed sense of 5 constraints.
+Probing time = 0.09 sec. (186.26 ticks)
+Cover probing fixed 0 vars, tightened 22 bounds.
+Tried aggregator 2 times.
+Detecting symmetries...
+MIP Presolve eliminated 53 rows and 121 columns.
+MIP Presolve modified 2616 coefficients.
+Aggregator did 12 substitutions.
+Reduced MIP has 1181 rows, 3647 columns, and 30191 nonzeros.
+Reduced MIP has 3634 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (50.36 ticks)
+Probing time = 0.01 sec. (7.82 ticks)
+Cover probing fixed 0 vars, tightened 3 bounds.
+Clique table members: 14637.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 20 threads.
+Root relaxation solution time = 0.09 sec. (164.92 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                        91349.6040       20.1899            99.98%
+      0     0       41.7101   106    91349.6040       41.7101     2140   99.95%
+*     0+    0                          213.5108       41.7101            80.46%
+      0     0       81.8422   110      213.5108      Cuts: 43     2863   61.67%
+*     0+    0                          187.1026       81.8422            56.26%
+      0     0       81.9648   133      187.1026      Cuts: 22     5404   56.19%
+      0     0       81.9836   180      187.1026      Cuts: 22     6459   56.18%
+*     0+    0                          174.0184       81.9836            52.89%
+*     0+    0                          173.0866       81.9836            52.63%
+      0     0  -1.00000e+75     0      173.0866       81.9836     6459   52.63%
+      0     0       82.0225   157      173.0866      Cuts: 44     6638   52.61%
+      0     0       82.0295   161      173.0866      Cuts: 28     6969   52.61%
+Detecting symmetries...
+      0     0       82.0355   170      173.0866      Cuts: 26     7174   52.60%
+      0     0       82.0659   156      173.0866      Cuts: 17     7473   52.59%
+      0     0       82.0754   187      173.0866      Cuts: 22     7849   52.58%
+      0     0       82.0850   181      173.0866      Cuts: 20     8028   52.58%
+      0     0       82.1188   189      173.0866      Cuts: 15     8255   52.56%
+      0     0       82.1512   180      173.0866      Cuts: 22     8514   52.54%
+      0     0       82.1570   189      173.0866      Cuts: 24     8738   52.53%
+      0     0       82.1743   156      173.0866    MIRcuts: 3     8807   52.52%
+      0     0       82.1843   175      173.0866      Cuts: 25     8941   52.52%
+*     0+    0                          155.4214       82.1843            47.12%
+*     0+    0                          154.0151       82.1843            46.64%
+Detecting symmetries...
+      0     2       82.1843   143      154.0151       82.1843     8941   46.64%
+Elapsed time = 1.93 sec. (2634.96 ticks, tree = 0.02 MB, solutions = 7)
+     12     7      139.3593    88      154.0151       82.1992    13519   46.63%
+     85    10      125.3343   102      154.0151       82.1992    28304   46.63%
+    211     6      126.7822   104      154.0151       88.4839    49571   42.55%
+    241     6      127.7766    71      154.0151       88.4839    51945   42.55%
+    379    30      146.5592    99      154.0151       88.4839    62485   42.55%
+    882    13      110.0879   122      154.0151       88.4839    96534   42.55%
+    918     7        cutoff            154.0151       88.4839   109446   42.55%
+   1071    39      132.9340    79      154.0151       89.9993   120734   41.56%
+   1519    83      126.5512    87      154.0151       90.0711   146003   41.52%
+   3867    14      140.0307   141      154.0151       99.9722   262352   35.09%
+Elapsed time = 4.56 sec. (5833.77 ticks, tree = 0.08 MB, solutions = 7)
+   4613    26      152.9996    40      154.0151      103.0585   309794   33.09%
+
+Clique cuts applied:  4
+Cover cuts applied:  4
+Implied bound cuts applied:  174
+Mixed integer rounding cuts applied:  34
+Zero-half cuts applied:  1
+Gomory fractional cuts applied:  1
+
+Root node processing (before b&c):
+  Real time             =    1.88 sec. (2584.41 ticks)
+Parallel b&c, 20 threads:
+  Real time             =    3.70 sec. (4976.06 ticks)
+  Sync time (average)   =    2.30 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    5.58 sec. (7560.47 ticks)
+Solve time: 5.589
+Objective Value: 154.015
+
+Truck Schedule: 
+Stage 1: Truck arrived node 0 at 0
+	Truck departed from node 0 to node 7 at 0
+Stage 2: Truck arrived node 7 at 44.1104
+	Truck departed from node 7 to node 7 at 44.1104
+Stage 3: Truck arrived node 7 at 44.1104
+	Truck departed from node 7 to node 7 at 69.4788
+Stage 4: Truck arrived node 7 at 69.4788
+	Truck departed from node 7 to node 7 at 89.0114
+Stage 5: Truck arrived node 7 at 89.0114
+	Truck departed from node 7 to node 10 at 109.905
+Stage 6: Truck arrived node 10 at 154.015
+
+Truck arc:
+Stage 1: 0 -> 7
+Stage 2: 7 -> 7
+Stage 3: 7 -> 7
+Stage 4: 7 -> 7
+Stage 5: 7 -> 10
+
+Drone Schedule: 
+Stage 1 to 2: Drone departed from node 0 visited customer 1 and arrived to node 7
+	 Departed at: 0
+	 Visited at: 28.1532
+	 Arrived at: 43.3556
+Added drone operation: position 0 (node 0) -> customer 1 -> position 1 (node 7)
+Stage 2 to 3: Drone departed from node 7 visited customer 5 and arrived to node 7
+	 Departed at: 44.1104
+	 Visited at: 56.7946
+	 Arrived at: 69.4788
+Added drone operation: position 1 (node 7) -> customer 5 -> position 2 (node 7)
+Stage 3 to 4: Drone departed from node 7 visited customer 8 and arrived to node 7
+	 Departed at: 69.4788
+	 Visited at: 78.1455
+	 Arrived at: 86.8122
+Added drone operation: position 2 (node 7) -> customer 8 -> position 3 (node 7)
+Stage 4 to 5: Drone departed from node 7 visited customer 4 and arrived to node 7
+	 Departed at: 89.0114
+	 Visited at: 98.273
+	 Arrived at: 107.535
+Added drone operation: position 3 (node 7) -> customer 4 -> position 4 (node 7)
+Stage 5 to 6: Drone departed from node 7 visited customer 2 and arrived to node 10
+	 Departed at: 109.905
+	 Visited at: 123.292
+	 Arrived at: 149.427
+Added drone operation: position 4 (node 7) -> customer 2 -> position 5 (node 10)
+
+Jetsuite Schedule: 
+Stage 2: Jetsuite launched from node 7 served customer 3 and recovered at node 7
+Stage 3: Jetsuite launched from node 7 served customer 6 and recovered at node 7
+Stage 4: Jetsuite launched from node 7 served customer 9 and recovered at node 7
+x[0][7][1] = 1
+x[7][7][2] = 1
+x[7][7][3] = 1
+x[7][7][4] = 1
+x[7][10][5] = 1
+
+Drone Variables (V[i][h][k]):
+Y[0][1][1] = 1
+Y[7][2][5] = 1
+Y[7][4][4] = 1
+Y[7][5][2] = 1
+Y[7][8][3] = 1
+
+Jetsuite Variables (U[i][h][k]):
+U[7][3][2] = 1
+U[7][6][3] = 1
+U[7][9][4] = 1
+Time schedule is not given, recalculating...
+Output is written to /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/output_stagebase//uniform-alpha_3-58-n10-maxradius-100.csv
+
+Checking the feasibility of the solution...
+Current objective: 154.015
+Recalculated objective: 149.446

@@ -1,0 +1,157 @@
+mode: 31, sl: 0, sr: 0, revisit: 1, loop: 1
+Jetsuite speed factor: 8.48
+Solving mode: 31-indexed base
+Solving mode: 31-indexed base
+Instance name: /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/Niels_instances/output_with_jetsuite//uniform-alpha_3-60-n10-maxradius-20.txt
+---------------------------------------------------------------
+Current config:
+- Number of threads = -1
+- Drone endurance = 9999
+- SL = 0
+- SR = 0
+- Allow loop = 1
+- Allow revisit = 1
+- Allow multi-visit drone = 0
+- Use TSP optimal solution as warmstart: = 0
+- Use cutting plane method: = 0
+- Use CPLEX conflict refiner: = 0
+- Debug info: = 0
+- Jetsuit enabled: = 1
+---------------------------------------------------------------
+Version identifier: 22.1.1.0 | 2022-11-28 | 9160aff4d
+Tried aggregator 2 times.
+MIP Presolve eliminated 3669 rows and 1008 columns.
+MIP Presolve modified 2160 coefficients.
+Aggregator did 585 substitutions.
+Reduced MIP has 2655 rows, 1437 columns, and 12970 nonzeros.
+Reduced MIP has 738 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.02 sec. (41.73 ticks)
+Found incumbent of value 538.759849 after 0.02 sec. (48.50 ticks)
+Probing time = 0.01 sec. (5.58 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 2655 rows, 1437 columns, and 12970 nonzeros.
+Reduced MIP has 738 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (7.15 ticks)
+Probing time = 0.01 sec. (5.49 ticks)
+Clique table members: 6947.
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 20 threads.
+Root relaxation solution time = 0.01 sec. (12.26 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                          538.7598      115.3866            78.58%
+      0     0      115.3866    32      538.7598      115.3866      203   78.58%
+*     0+    0                          520.1539      115.3866            77.82%
+      0     0      115.3866    21      520.1539       Cuts: 8      257   77.82%
+*     0+    0                          382.0649      115.3866            69.80%
+      0     0      115.3866    24      382.0649     Cuts: 105      373   69.80%
+      0     0      115.3866    18      382.0649       Cuts: 6      396   69.80%
+*     0+    0                          366.8805      115.3866            68.55%
+      0     0      115.3866    38      366.8805      Cuts: 43      539   68.55%
+*     0+    0                          348.9173      115.3866            66.93%
+*     0+    0                          297.0811      115.3866            61.16%
+Detecting symmetries...
+      0     2      115.3866     9      297.0811      115.3866      539   61.16%
+Elapsed time = 0.27 sec. (325.57 ticks, tree = 0.02 MB, solutions = 6)
+*    46+    4                          294.8836      115.3866            60.87%
+*  1746  1073      integral     0      284.9870      115.3866    37524   59.51%
+*  1797  1183      integral     0      247.7000      115.3866    41358   53.42%
+*  2043  1376      integral     0      225.9212      115.3866    48546   48.93%
+*  4116+ 2330                          219.6499      115.3866            47.47%
+*  4223+ 2256                          219.4462      115.3866            47.42%
+   4867  2283      117.1933    13      219.4462      115.3866   113700   47.42%
+*  4951+ 2310                          219.0831      115.3866            47.33%
+*  6843+ 3301                          203.9207      115.3866            43.42%
+   6989  3244      153.2177    14      203.9207      115.3866   187523   43.42%
+*  7044+ 3243                          201.9728      115.3866            42.87%
+   8590  3517      115.3909    33      201.9728      115.3866   265066   42.87%
+
+Performing restart 1
+
+Repeating presolve.
+Tried aggregator 1 time.
+MIP Presolve eliminated 621 rows and 79 columns.
+MIP Presolve modified 1384 coefficients.
+Reduced MIP has 2034 rows, 1358 columns, and 11002 nonzeros.
+Reduced MIP has 737 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (5.35 ticks)
+Tried aggregator 1 time.
+MIP Presolve modified 2016 coefficients.
+Reduced MIP has 2034 rows, 1358 columns, and 11002 nonzeros.
+Reduced MIP has 737 binaries, 0 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (6.54 ticks)
+Represolve time = 0.02 sec. (34.72 ticks)
+   9512     0      115.3866    37      201.9728      Cuts: 16   331001   42.87%
+   9512     0      115.3866    29      201.9728      Cuts: 59   331078   42.87%
+   9512     0      115.3866    26      201.9728      Cuts: 51   331123   42.87%
+   9512     0      115.3866    34      201.9728      Cuts: 30   331385   42.87%
+   9512     0      115.3866    14      201.9728      Cuts: 11   331404   42.87%
+   9512     0      115.3866    27      201.9728      Cuts: 14   331487   42.87%
+   9512     0      115.3866    19      201.9728       Cuts: 6   331576   42.87%
+   9512     0      115.3866    22      201.9728      Cuts: 23   331665   42.87%
+   9512     0      115.3866    14      201.9728      Cuts: 25   331695   42.87%
+*  9512+    0                          201.6550      115.3866            42.78%
+   9512     0  -1.00000e+75     0      201.6550      115.3866   331695   42.78%
+   9512     2      115.3866    21      201.6550      115.3866   331695   42.78%
+*  9724+    5                          201.5853      115.3866            42.76%
+   9724    29      148.1434    13      201.5853      115.3866   338945   42.76%
+   9840     6    infeasible            201.5853      115.3866   350118   42.76%
+*  9988    18      integral     0      200.1449      115.3866   355899   42.35%
+  10104    16      115.3866    21      200.1449      115.3866   360385   42.35%
+
+GUB cover cuts applied:  2
+Implied bound cuts applied:  49
+Flow cuts applied:  13
+Mixed integer rounding cuts applied:  21
+Zero-half cuts applied:  2
+Gomory fractional cuts applied:  1
+
+Root node processing (before b&c):
+  Real time             =    0.20 sec. (325.06 ticks)
+Parallel b&c, 20 threads:
+  Real time             =    2.62 sec. (3478.82 ticks)
+  Sync time (average)   =    1.00 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    2.82 sec. (3803.88 ticks)
+Solve time: 2.823
+Objective Value: 200.145
+
+Truck Schedule (no-stage): 
+
+Truck path: 0 1 6 2 4 0 
+Drone: launch 0, serve 3, rendezvous 6
+	 Departed at: 0
+	 Visited at: 32.6965
+	 Arrived at: 53.7387
+Drone: launch 2, serve 5, rendezvous 4
+	 Departed at: 95.9287
+	 Visited at: 117.045
+	 Arrived at: 141.642
+Jetsuite: launch 2, serve 9, return 2
+Jetsuite: launch 4, serve 8, return 4
+Jetsuite: launch 6, serve 7, return 6
+
+========== SOLUTION (MODE 31 – CASE 2) ==========
+Truck route:
+  0 1 6 2 4 0 
+Drone tasks (launch i -> customer j -> rendezvous u):
+  0 -> 3 -> 6
+  2 -> 5 -> 4
+JetSuite tasks (i -> k -> i):
+  2 -> 9 -> 2
+  4 -> 8 -> 4
+  6 -> 7 -> 6
+Makespan: 200.145
+===============================================
+Time schedule is not given, recalculating...
+Output is written to /media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/output//uniform-alpha_3-60-n10-maxradius-20.csv
+
+Checking feasibility of the solution (MODE 31 – Case 2, no-stage)...
+Using objective value from CPLEX: 200.145
+(Skipping recalculation check - timing may exclude waiting time)
+The solution is FEASIBLE (MODE 31)

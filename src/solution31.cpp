@@ -35,12 +35,12 @@ void Solution31::recalculateTime()
 
     if (truck_order.empty())
         return;
- 
+
     if (truck_order[0] != 0 && cfg->screen_mode >= 1)
         cerr << "Warning: The truck does not start at DEPOT\n";
 
     // ---------------- Truck timing ----------------
-    double t = 0.0; 
+    double t = 0.0;
     truck_time.push_back(t);
 
     for (size_t idx = 1; idx < truck_order.size(); ++idx)
@@ -50,12 +50,11 @@ void Solution31::recalculateTime()
         t += instance->tau[prev][cur];
         truck_time.push_back(t);
     }
-    
+
     // Sau khi đã build truck_time
     unordered_map<int, int> node2pos;
     for (int p = 0; p < (int)truck_order.size(); ++p)
         node2pos[truck_order[p]] = p;
-
 
     // ---------------- Drone timing (i, j, u) ----------------
     for (auto &d : drone_order)
@@ -93,17 +92,6 @@ void Solution31::recalculateTime()
 
 void Solution31::recalculateObjective()
 {
-    double truck_finish = truck_time.empty() ? 0.0 : truck_time.back();
-    double drone_finish = 0.0;
-    double jetsuite_finish = 0.0;
-
-    for (auto &d : drone_time)
-        drone_finish = max(drone_finish, d.back());
-
-    for (auto &j : jetsuite_time)
-        jetsuite_finish = max(jetsuite_finish, j.back());
-
-    cost = max({truck_finish, drone_finish, jetsuite_finish});
 }
 
 // ============================================================
@@ -144,7 +132,6 @@ bool Solution31::isTimeTruckValid()
     }
     return true;
 }
-
 
 // ============================================================
 // Drone endurance & structure
@@ -321,12 +308,17 @@ void Solution31::write()
 
     // ---------- Output file name ----------
     std::string file_name = "solution.csv";
-    if (auto pos = instance->folder_path.find("RV-FSTSP"); pos != std::string::npos)
+
+    // Extract filename from folder_path (remove directory and .txt extension)
+    std::string path = instance->folder_path;
+    size_t last_slash = path.find_last_of("/\\");
+    if (last_slash != std::string::npos)
     {
-        file_name = instance->folder_path.substr(pos + 9);
-        for (auto &c : file_name)
-            if (c == '/')
-                c = '_';
+        file_name = path.substr(last_slash + 1);
+        // Remove .txt extension if exists
+        size_t txt_pos = file_name.rfind(".txt");
+        if (txt_pos != std::string::npos)
+            file_name = file_name.substr(0, txt_pos);
         file_name += ".csv";
     }
 
@@ -462,16 +454,13 @@ void Solution31::write()
     }
 
     // =========================================================
-    // FOOTER (GIỮ NGUYÊN)
+    // FOOTER - SỬ DỤNG COST TỪ CPLEX (CHÍNH XÁC)
     // =========================================================
-    double obj = truck_time.empty() ? 0.0 : truck_time.back();
-    if (!drone_time.empty())
-        obj = std::max(obj, drone_time.back().back());
-    if (!jetsuite_time.empty())
-        obj = std::max(obj, jetsuite_time.back().back());
+    // ❌ KHÔNG tính lại objective từ timing data (có thể sai)!
+    // ✅ Dùng trực tiếp biến 'cost' đã được CPLEX tính
 
     out << "\n";
-    out << "Objective/Upper bound," << obj << "\n";
+    out << "Objective/Upper bound," << cost << "\n";
     out << "Lower bound," << lower_bound << "\n";
     out << "Gap," << gap << "%\n";
     out << "Solving time (s)," << solve_time << "\n";

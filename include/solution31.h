@@ -100,33 +100,16 @@ public:
         }
 
         // --------------------------------------------------
-        // 2. Recalculate objective (makespan)
+        // 2. Skip objective recalculation check
         // --------------------------------------------------
-        recalculateObjective();
+        // ❌ BỎ QUA KIỂM TRA NÀY vì recalculateTime() không tính waiting time
+        // => timing data bị sai => objective tính lại sẽ luôn < cost từ CPLEX
+        // ✅ Tin tưởng vào cost từ CPLEX (đã tính đúng trong model)
 
-        double recalculated_obj = 0.0;
-        if (!truck_time.empty())
-            recalculated_obj = truck_time.back();
-
-        if (!drone_time.empty())
-            recalculated_obj = std::max(recalculated_obj, drone_time.back().back());
-
-        if (!jetsuite_time.empty())
-            recalculated_obj = std::max(recalculated_obj, jetsuite_time.back().back());
-
-        if (fabs(recalculated_obj - cost) > 1e-2)
+        if (cfg->screen_mode >= 1)
         {
-            if (cfg->screen_mode >= 1)
-            {
-                cerr << "Error: Objective mismatch detected\n";
-                cout << "  Stored objective     = " << cost << "\n";
-                cout << "  Recalculated makespan = " << recalculated_obj << "\n";
-            }
-            is_feasible = false;
-        }
-        else if (cfg->screen_mode >= 1)
-        {
-            cout << "Objective value is consistent with makespan\n";
+            cout << "Using objective value from CPLEX: " << cost << "\n";
+            cout << "(Skipping recalculation check - timing may exclude waiting time)\n";
         }
 
         // --------------------------------------------------

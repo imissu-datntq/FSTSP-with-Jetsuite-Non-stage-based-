@@ -422,14 +422,19 @@ void Solution::write()
         return;
     }
 
-    // lấy tên file đầu ra
+    // ---------- Output file name ----------
     std::string file_name = "solution.csv";
-    if (auto pos = instance->folder_path.find("RV-FSTSP"); pos != std::string::npos)
+
+    // Extract filename from folder_path (remove directory and .txt extension)
+    std::string path = instance->folder_path;
+    size_t last_slash = path.find_last_of("/\\");
+    if (last_slash != std::string::npos)
     {
-        file_name = instance->folder_path.substr(pos + 9);
-        for (auto &c : file_name)
-            if (c == '/')
-                c = '_';
+        file_name = path.substr(last_slash + 1);
+        // Remove .txt extension if exists
+        size_t txt_pos = file_name.rfind(".txt");
+        if (txt_pos != std::string::npos)
+            file_name = file_name.substr(0, txt_pos);
         file_name += ".csv";
     }
 

@@ -1,7 +1,10 @@
 #!/bin/bash
 
-input_dir="/home/orlab/rv-fstsp2/rv-fstsp-jetsuite/Niels_instances/output_with_jetsuite/"
-output_dir="/home/orlab/rv-fstsp2/rv-fstsp-jetsuite/Niels_instances/result_jetsuite"
+# Force English locale for consistent number formatting
+export LC_NUMERIC=C
+
+input_dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/Niels_instances/output_with_jetsuite/"
+output_dir="/media/orlab/437478a6-2666-4549-903d-18e9d7d1c34f/orlab/Quocdat/SLSCM Lab/projects/output_stagebase/"
 log_file="$output_dir/run_log.txt"  # File để ghi log từ terminal
 
 # Tạo thư mục output nếu chưa tồn tại
@@ -10,12 +13,12 @@ mkdir -p "$output_dir"
 # Xóa file log cũ (nếu có)
 > "$log_file"
 
-# Tìm các bộ test có n <= 20 (theo regex)
-instances=$(ls "$input_dir" | grep -E "^.*n[1-9]-.*$|^.*n1[0-9]-.*$|^.*n20-.*$")
+# Tìm các bộ test có n <= 10 (theo regex)
+instances=$(ls "$input_dir" | grep -E "^.*n[1-9]-.*$|^.*n1[0-9]-.*$|^.*n10-.*$")
 
 # Đếm tổng số bộ test thỏa mãn điều kiện
 total_instances=$(echo "$instances" | wc -l)
-echo "Tổng số bộ test (n <= 20): $total_instances" | tee -a "$log_file"
+echo "Tổng số bộ test (n <= 10): $total_instances" | tee -a "$log_file"
 
 # Biến đếm số lượng bộ test đã giải quyết
 solved=0
@@ -30,7 +33,7 @@ for instance in $instances; do
   echo "-----------------------------------" | tee -a "$log_file"
 
   # Chạy chương trình RV-FSTSP với giới hạn thời gian 1 tiếng (3600 giây)
-  timeout 3600 ./RV-FSTSP -i "$input_file" | tee "$output_file" >> "$log_file"
+  timeout 3600 ./build/RV-FSTSP -i "$input_file" -o "$output_dir" | tee "$output_file"
 
   # Kiểm tra xem chương trình có bị dừng do hết thời gian không
   if [ $? -eq 124 ]; then
@@ -54,4 +57,4 @@ for instance in $instances; do
   echo | tee -a "$log_file"
 done
 
-echo "Hoàn thành! Tất cả $total_instances bộ test (n <= 20) đã được giải quyết." | tee -a "$log_file"
+echo "Hoàn thành! Tất cả $total_instances bộ test (n <= 10) đã được giải quyết." | tee -a "$log_file"
