@@ -61,6 +61,7 @@ public:
     bool isSynchronizeTime();
     bool isSatisfyOtherConstraints();
     bool isTimeJetsuiteValid(); // **New function**
+    void debugConstraints();    // **Debug: print all constraint check results**
 
     bool isFeasible()
     {
@@ -101,10 +102,13 @@ public:
 
         // Check feasibility of all elements
         if (!(areCustomersVisited() && isTimeTruckValid() && isTimeDroneValid() && isTimeJetsuiteValid() &&
-            isSynchronizeTime() && isSatisfyOtherConstraints()))
+              isSynchronizeTime() && isSatisfyOtherConstraints()))
         {
             is_feasible = false;
         }
+
+        // Always print detailed constraint debug log at the end
+        debugConstraints();
 
         if (is_feasible)
         {
@@ -113,7 +117,6 @@ public:
             return true;
         }
         return false;
-        
     }
 };
 

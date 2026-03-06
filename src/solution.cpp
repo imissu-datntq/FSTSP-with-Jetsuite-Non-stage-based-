@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <set>
 #include <unordered_map>
@@ -704,6 +705,372 @@ void Solution::print_mode31()
 
     cout << endl;
 }
+
+// ============================================================
+//  debugConstraints – in chi tiết từng ràng buộc PASS / FAIL
+// ============================================================
+void Solution::debugConstraints()
+{
+    using std::left;
+    using std::setw;
+    auto PASS = [](bool ok)
+    { return ok ? "  [PASS]" : "  [FAIL]"; };
+
+    cout << "\n";
+    cout << "============================================================\n";
+    cout << "  CONSTRAINT DEBUG LOG\n";
+    cout << "============================================================\n";
+
+    // ------------------------------------------------------------------
+    // C0: Objective consistency
+    // ------------------------------------------------------------------
+    {
+        double recalc = truck_time.empty() ? 0.0 : truck_time.back();
+        if (!drone_time.empty())
+            recalc = std::max(recalc, drone_time.back().back());
+        if (!jetsuite_time.empty())
+            recalc = std::max(recalc, jetsuite_time.back().back());
+        bool ok = (std::fabs(recalc - cost) <= 0.01);
+        cout << PASS(ok) << " C0  Objective consistency"
+             << "  (stored=" << cost << ", recalc=" << recalc << ")\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C1: All customers visited
+    // ------------------------------------------------------------------
+    {
+        bool ok = areCustomersVisited();
+        cout << PASS(ok) << " C1  All customers visited\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C2: Truck time sizes match
+    // ------------------------------------------------------------------
+    {
+        bool ok = (truck_time.size() == truck_order.size());
+        cout << PASS(ok) << " C2  Truck time array size matches truck route"
+             << "  (time=" << truck_time.size() << ", route=" << truck_order.size() << ")\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C3: Truck travel time non-decreasing (each step >= tau)
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 1; i < (int)truck_order.size(); i++)
+        {
+            int u = truck_order[i - 1], v = truck_order[i];
+            double minimal = truck_time[i - 1] + instance->tau[u][v];
+            bool ok = (truck_time[i] + 1e-6 >= minimal);
+            if (!ok)
+            {
+                cout << "  [FAIL] C3  Truck step " << i << ": node " << u << "->" << v
+                     << "  time=" << truck_time[i] << " < min=" << minimal << "\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C3  Truck travel time valid for all " << (int)truck_order.size() - 1 << " edge(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C4: Truck does not return to depot in the middle
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 1; i + 1 < (int)truck_order.size(); i++)
+        {
+            if (truck_order[i] == 0 && truck_order[i + 1] != 0)
+            {
+                cout << "  [FAIL] C4  Truck returns to depot at position " << i
+                     << " then leaves again (node " << truck_order[i + 1] << ")\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C4  Truck never returns to depot mid-route\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C5: Drone sortie array sizes match
+    // ------------------------------------------------------------------
+    {
+        bool ok = (drone_time.size() == drone_order.size());
+        cout << PASS(ok) << " C5  Drone sortie time array size matches"
+             << "  (time=" << drone_time.size() << ", order=" << drone_order.size() << ")\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C6: Drone visit time correct (tau_prime + optional SL)
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)drone_order.size(); i++)
+        {
+            if (i >= (int)drone_time.size())
+                break;
+            int launch_pos = drone_order[i][0];
+            int visit_node = drone_order[i][1];
+            if (launch_pos < 0 || launch_pos >= (int)truck_order.size())
+                continue;
+            int launch_node = truck_order[launch_pos];
+            double expected = (launch_pos == 0)
+                                  ? (drone_time[i][0] + instance->tau_prime[launch_node][visit_node])
+                                  : (drone_time[i][0] + cfg->sl + instance->tau_prime[launch_node][visit_node]);
+            bool ok = (std::fabs(drone_time[i][1] - expected) <= 1e-6);
+            if (!ok)
+            {
+                cout << "  [FAIL] C6  Drone sortie " << i << ": visit node " << visit_node
+                     << "  time=" << drone_time[i][1] << " expected=" << expected << "\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C6  Drone visit times correct for all " << (int)drone_order.size() << " sortie(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C7: Drone rendezvous / return-to-depot time feasible
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)drone_order.size(); i++)
+        {
+            if (i >= (int)drone_time.size())
+                break;
+            int launch_pos = drone_order[i][0];
+            int visit_node = drone_order[i][1];
+            int recover_pos = drone_order[i][2];
+            if (recover_pos == 0)
+            {
+                double min_ret = drone_time[i][1] + instance->tau_prime[visit_node][0];
+                bool ok = (drone_time[i][2] + 1e-6 >= min_ret);
+                if (!ok)
+                {
+                    cout << "  [FAIL] C7  Drone sortie " << i << ": return-to-depot"
+                         << "  t=" << drone_time[i][2] << " < min=" << min_ret << "\n";
+                    all_ok = false;
+                }
+            }
+            else
+            {
+                if (recover_pos < (int)truck_order.size())
+                {
+                    int rdv_node = truck_order[recover_pos];
+                    double min_meet = drone_time[i][1] + cfg->sr + instance->tau_prime[visit_node][rdv_node];
+                    bool ok = (drone_time[i][2] + 1e-6 >= min_meet);
+                    if (!ok)
+                    {
+                        cout << "  [FAIL] C7  Drone sortie " << i << ": rendezvous node " << rdv_node
+                             << "  t=" << drone_time[i][2] << " < min=" << min_meet << "\n";
+                        all_ok = false;
+                    }
+                }
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C7  Drone rendezvous/return times feasible for all " << (int)drone_order.size() << " sortie(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C8: Drone endurance not exceeded
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)drone_order.size(); i++)
+        {
+            if (i >= (int)drone_time.size())
+                break;
+            int launch_pos = drone_order[i][0];
+            double flight = drone_time[i][2] - drone_time[i][0] - ((launch_pos == 0) ? 0.0 : cfg->sl);
+            bool ok = (flight <= cfg->dtl + 1e-6);
+            if (!ok)
+            {
+                cout << "  [FAIL] C8  Drone sortie " << i << ": flight time=" << flight
+                     << " > endurance=" << cfg->dtl << "\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C8  Drone endurance satisfied for all " << (int)drone_order.size() << " sortie(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C9: Jetsuite sortie array sizes match
+    // ------------------------------------------------------------------
+    {
+        bool ok = (jetsuite_time.size() == jetsuite_order.size());
+        cout << PASS(ok) << " C9  Jetsuite sortie time array size matches"
+             << "  (time=" << jetsuite_time.size() << ", order=" << jetsuite_order.size() << ")\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C10: Jetsuite visit time correct (tau_prime_prime + optional SL)
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)jetsuite_order.size(); i++)
+        {
+            if (i >= (int)jetsuite_time.size())
+                break;
+            int launch_pos = jetsuite_order[i][0];
+            int visit_node = jetsuite_order[i][1];
+            if (launch_pos < 0 || launch_pos >= (int)truck_order.size())
+                continue;
+            int launch_node = truck_order[launch_pos];
+            double expected = (launch_pos == 0)
+                                  ? (jetsuite_time[i][0] + instance->tau_prime_prime[launch_node][visit_node])
+                                  : (jetsuite_time[i][0] + cfg->sl + instance->tau_prime_prime[launch_node][visit_node]);
+            bool ok = (std::fabs(jetsuite_time[i][1] - expected) <= 1e-6);
+            if (!ok)
+            {
+                cout << "  [FAIL] C10 Jetsuite sortie " << i << ": visit node " << visit_node
+                     << "  time=" << jetsuite_time[i][1] << " expected=" << expected << "\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C10 Jetsuite visit times correct for all " << (int)jetsuite_order.size() << " sortie(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C11: Jetsuite rendezvous / return-to-depot time feasible
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)jetsuite_order.size(); i++)
+        {
+            if (i >= (int)jetsuite_time.size())
+                break;
+            int visit_node = jetsuite_order[i][1];
+            int recover_pos = jetsuite_order[i][2];
+            if (recover_pos == 0)
+            {
+                double min_ret = jetsuite_time[i][1] + instance->tau_prime_prime[visit_node][0];
+                bool ok = (jetsuite_time[i][2] + 1e-6 >= min_ret);
+                if (!ok)
+                {
+                    cout << "  [FAIL] C11 Jetsuite sortie " << i << ": return-to-depot"
+                         << "  t=" << jetsuite_time[i][2] << " < min=" << min_ret << "\n";
+                    all_ok = false;
+                }
+            }
+            else
+            {
+                if (recover_pos < (int)truck_order.size())
+                {
+                    int rdv_node = truck_order[recover_pos];
+                    double min_meet = jetsuite_time[i][1] + cfg->sr + instance->tau_prime_prime[visit_node][rdv_node];
+                    bool ok = (jetsuite_time[i][2] + 1e-6 >= min_meet);
+                    if (!ok)
+                    {
+                        cout << "  [FAIL] C11 Jetsuite sortie " << i << ": rendezvous node " << rdv_node
+                             << "  t=" << jetsuite_time[i][2] << " < min=" << min_meet << "\n";
+                        all_ok = false;
+                    }
+                }
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C11 Jetsuite rendezvous/return times feasible for all " << (int)jetsuite_order.size() << " sortie(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C12: Synchronization – drone launch time == truck depart time
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)drone_time.size(); i++)
+        {
+            int ls = drone_order[i][0];
+            if (ls < 0 || ls >= (int)truck_time.size())
+                continue;
+            bool ok = (std::fabs(truck_time[ls] - drone_time[i][0]) <= 0.01);
+            if (!ok)
+            {
+                cout << "  [FAIL] C12 Drone sortie " << i << ": launch sync"
+                     << "  truck_t=" << truck_time[ls] << " drone_t=" << drone_time[i][0] << "\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C12 Drone launch time synced with truck for all " << (int)drone_order.size() << " sortie(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C13: Synchronization – drone rendezvous time == truck arrival time
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)drone_time.size(); i++)
+        {
+            int rs = drone_order[i][2];
+            if (rs == 0)
+                continue;
+            if (rs >= (int)truck_time.size())
+                continue;
+            bool ok = (std::fabs(truck_time[rs] - drone_time[i][2]) <= 0.01);
+            if (!ok)
+            {
+                cout << "  [FAIL] C13 Drone sortie " << i << ": rendezvous sync"
+                     << "  truck_t=" << truck_time[rs] << " drone_t=" << drone_time[i][2] << "\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C13 Drone rendezvous time synced with truck for all " << (int)drone_order.size() << " sortie(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C14: Synchronization – jetsuite launch time == truck depart time
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)jetsuite_time.size(); i++)
+        {
+            int ls = jetsuite_order[i][0];
+            if (ls < 0 || ls >= (int)truck_time.size())
+                continue;
+            bool ok = (std::fabs(truck_time[ls] - jetsuite_time[i][0]) <= 0.01);
+            if (!ok)
+            {
+                cout << "  [FAIL] C14 Jetsuite sortie " << i << ": launch sync"
+                     << "  truck_t=" << truck_time[ls] << " js_t=" << jetsuite_time[i][0] << "\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C14 Jetsuite launch time synced with truck for all " << (int)jetsuite_order.size() << " sortie(s)\n";
+    }
+
+    // ------------------------------------------------------------------
+    // C15: Synchronization – jetsuite rendezvous time == truck arrival time
+    // ------------------------------------------------------------------
+    {
+        bool all_ok = true;
+        for (int i = 0; i < (int)jetsuite_time.size(); i++)
+        {
+            int rs = jetsuite_order[i][2];
+            if (rs == 0)
+                continue;
+            if (rs >= (int)truck_time.size())
+                continue;
+            bool ok = (std::fabs(truck_time[rs] - jetsuite_time[i][2]) <= 0.01);
+            if (!ok)
+            {
+                cout << "  [FAIL] C15 Jetsuite sortie " << i << ": rendezvous sync"
+                     << "  truck_t=" << truck_time[rs] << " js_t=" << jetsuite_time[i][2] << "\n";
+                all_ok = false;
+            }
+        }
+        if (all_ok)
+            cout << "  [PASS] C15 Jetsuite rendezvous time synced with truck for all " << (int)jetsuite_order.size() << " sortie(s)\n";
+    }
+
+    cout << "============================================================\n\n";
+}
+
+// ============================================================
 
 void Solution::print()
 {
