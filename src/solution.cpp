@@ -136,7 +136,17 @@ void Solution::recalculateTime()
                 continue;
             }
 
-            if (recover_pos == s + 1)
+            if (recover_pos == s)
+            {
+                // Jetsuite loop-back: phóng từ node u và quay về node u (truck đứng im x[u][u][k]=1)
+                // Truck phải chờ jetsuite về trước khi "rời" stage s (tức là trước khi tính truck_time[s+1])
+                double js_back_time = js_visit_time + cfg->sr + instance->tau_prime_prime[visit_node][u];
+                // base_arrival_next = depart_time + tau[u][v] = depart_time + tau[u][u] = depart_time + 0
+                // → wait = js về - base_arrival_next
+                wait_at_next = std::max(wait_at_next, js_back_time - base_arrival_next);
+                jetsuite_time.push_back({launch_time, js_visit_time, js_back_time});
+            }
+            else if (recover_pos == s + 1)
             {
                 double js_arrive_v = js_visit_time + cfg->sr + instance->tau_prime_prime[visit_node][v];
                 double truck_ready_v = base_arrival_next + cfg->sr;
@@ -373,7 +383,20 @@ bool Solution::isSynchronizeTime()
             return false;
         }
 
-        if (rendezvous_stage != 0)
+        // Jetsuite loop-back (recover_pos == launch_pos): truck chờ js về mới rời stage
+        if (rendezvous_stage == launch_stage)
+        {
+            if (launch_stage + 1 < (int)truck_time.size())
+            {
+                if (truck_time[launch_stage + 1] + 1e-6 < jetsuite_time[i][2])
+                {
+                    if (cfg->screen_mode >= 1)
+                        cerr << "Time error: Truck departs before jetsuite returns (loop-back sortie " << i << ")\n";
+                    return false;
+                }
+            }
+        }
+        else if (rendezvous_stage != 0)
         {
             if (rendezvous_stage >= (int)truck_time.size())
                 return false;
@@ -1044,27 +1067,50 @@ void Solution::debugConstraints()
     }
 
     // ------------------------------------------------------------------
-    // C15: Synchronization – jetsuite rendezvous time == truck arrival time
+    // C15: Synchronization – jetsuite rendezvous/return time vs truck departure
+    //      - loop-back (recover_pos == launch_pos): truck_time[launch_pos+1] >= js_back_time
+    //      - rendezvous at other node: truck_time[recover_pos] == js_time[2]
     // ------------------------------------------------------------------
     {
         bool all_ok = true;
         for (int i = 0; i < (int)jetsuite_time.size(); i++)
         {
+            int ls = jetsuite_order[i][0];
             int rs = jetsuite_order[i][2];
             if (rs == 0)
-                continue;
-            if (rs >= (int)truck_time.size())
-                continue;
-            bool ok = (std::fabs(truck_time[rs] - jetsuite_time[i][2]) <= 0.01);
-            if (!ok)
+                continue; // về depot, không check sync với truck
+
+            if (rs == ls)
             {
-                cout << "  [FAIL] C15 Jetsuite sortie " << i << ": rendezvous sync"
-                     << "  truck_t=" << truck_time[rs] << " js_t=" << jetsuite_time[i][2] << "\n";
-                all_ok = false;
+                // Loop-back: truck phải chờ jetsuite về mới rời stage ls
+                // → truck_time[ls+1] >= js_back_time
+                if (ls + 1 >= (int)truck_time.size())
+                    continue;
+                bool ok = (truck_time[ls + 1] + 1e-6 >= jetsuite_time[i][2]);
+                if (!ok)
+                {
+                    cout << "  [FAIL] C15 Jetsuite sortie " << i << ": truck departs before jetsuite returns"
+                         << "  truck_depart=" << truck_time[ls + 1]
+                         << " js_back=" << jetsuite_time[i][2] << "\n";
+                    all_ok = false;
+                }
+            }
+            else
+            {
+                // Rendezvous tại node khác: phải đồng bộ đúng thời điểm
+                if (rs >= (int)truck_time.size())
+                    continue;
+                bool ok = (std::fabs(truck_time[rs] - jetsuite_time[i][2]) <= 0.01);
+                if (!ok)
+                {
+                    cout << "  [FAIL] C15 Jetsuite sortie " << i << ": rendezvous sync"
+                         << "  truck_t=" << truck_time[rs] << " js_t=" << jetsuite_time[i][2] << "\n";
+                    all_ok = false;
+                }
             }
         }
         if (all_ok)
-            cout << "  [PASS] C15 Jetsuite rendezvous time synced with truck for all " << (int)jetsuite_order.size() << " sortie(s)\n";
+            cout << "  [PASS] C15 Jetsuite return/rendezvous time valid for all " << (int)jetsuite_order.size() << " sortie(s)\n";
     }
 
     cout << "============================================================\n\n";

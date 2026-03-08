@@ -33,7 +33,7 @@ for instance in $instances; do
   echo "-----------------------------------" | tee -a "$log_file"
 
   # Chạy chương trình RV-FSTSP với giới hạn thời gian 1 tiếng (3600 giây)
-  timeout 3600 ./build/RV-FSTSP -i "$input_file" -o "$output_dir" | tee "$output_file"
+  timeout 3600 ./build/RV-FSTSP -i "$input_file" -o "$output_dir" --revisit false | tee "$output_file"
 
   # Kiểm tra xem chương trình có bị dừng do hết thời gian không
   if [ $? -eq 124 ]; then

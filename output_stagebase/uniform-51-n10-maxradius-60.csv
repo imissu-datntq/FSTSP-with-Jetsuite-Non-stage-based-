@@ -1,18 +1,18 @@
 Pos,Truck Node,Truck Time,Drone Time,Drone Node,Jetsuite Time,Jetsuite Node
-0,0,0,0,8,,
-1,4,84.9692,84.9692,3,,
-2,4,108.314,108.314,7,,
-3,4,130.518,130.518,1,,
-4,6,186.001,186.001,2,,
-5,10,227.86,227.86,2,,
+0,0,0,0,2,,
+1,6,41.8582,41.8582,1,,
+2,4,97.3416,97.3416,7,97.3416,9
+3,4,119.545,119.545,3,119.545,5
+4,4,142.89,142.89,8,,
+5,10,227.86,227.86,8,,
 
 Objective/Upper bound,227.86
-Lower bound,227.858
-Gap,0%
-Solving time (s),22.305
+Lower bound,227.839
+Gap,0.01%
+Solving time (s),23.665
 Truck served,2
 Drone served,5
-Jetsuite served,0
+Jetsuite served,2
 
 Current config:
 Number of threads,-1
@@ -20,4 +20,4 @@ Drone endurance,9999
 SL,0
 SR,0
 Allow loop,1
-Allow revisit,1
+Allow revisit,0

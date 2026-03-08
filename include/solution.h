@@ -69,10 +69,12 @@ public:
         if (cfg->screen_mode >= 1)
             cout << "\nChecking the feasibility of the solution...\n";
 
-        if (truck_time.empty())
+        if (truck_time.empty() ||
+            (drone_time.empty() && !drone_order.empty()) ||
+            (jetsuite_time.empty() && !jetsuite_order.empty()))
         {
             if (cfg->screen_mode >= 1)
-                cout << "Time schedule is not given, recalculating...\n";
+                cout << "Time schedule is not given or incomplete, recalculating...\n";
             recalculateTime();
         }
 

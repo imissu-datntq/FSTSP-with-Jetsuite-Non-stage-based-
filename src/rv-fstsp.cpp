@@ -28,8 +28,8 @@ Result FSTSPSolver::RV_FSTSP_3_index(Config &cfg) const
         double D_d = cfg.dtl;           // Maximum flight time of the drone
         double t_L = cfg.sl;            // Time needed to launch drone
         double t_R = cfg.sr;            // Time needed to recover drone
-        double tJ_L = cfg.sl;           // Time needed to launch jetsuit
-        double tJ_R = cfg.sr;           // Time needed to recover jetsuit
+        double tJ_L = cfg.tJ_L;         // Time needed to launch jetsuit
+        double tJ_R = cfg.tJ_R;         // Time needed to recover jetsuit
         // Define set variables for the model. Make the code way easier to read
 
         std::set<int> C, V, V_minus_E, V_minus_S;
@@ -746,7 +746,7 @@ Result FSTSPSolver::RV_FSTSP_3_index(Config &cfg) const
             {
                 for (int h : C)
                 {
-                    rhs_51 += U[i][h][k] * (tau_prime_prime[i][h] + tau_prime_prime[h][i]);
+                    rhs_51 += U[i][h][k] * (tau_prime_prime[i][h] + tau_prime_prime[h][i] + tJ_R);
                 }
             }
 
@@ -950,12 +950,21 @@ Result FSTSPSolver::RV_FSTSP_3_index(Config &cfg) const
                 {
                     if (cplex.isExtracted(U[i][h][k]) && cplex.getValue(U[i][h][k]) > 0.5)
                     {
-                        double launch_time = cplex.getValue(d[k]);                           // Jetsuite launch time
-                        double visit_time = launch_time + instance->tau_prime_prime[i][h];   // Time at customer
-                        double recovery_time = visit_time + instance->tau_prime_prime[h][i]; // Time returning to launch node
+                        int launch_pos = k - 1;  // 0-indexed position in truck_order
+                        int recover_pos = k - 1; // jetsuite returns to same node (launch == recover)
 
-                        cout << "Stage " << k << ": Jetsuite launched from node " << i
-                             << " served customer " << h << " and recovered at node " << i << std::endl;
+                        if (launch_pos >= 0 && launch_pos < (int)truck_order.size())
+                        {
+                            jetsuite_order.push_back({launch_pos, h, recover_pos});
+                            if (cfg.screen_mode >= 1)
+                                cout << "Stage " << k << ": Jetsuite launched from node " << i
+                                     << " served customer " << h << " and recovered at node " << i << std::endl;
+                        }
+                        else
+                        {
+                            cerr << "Warning: Invalid launch position for jetsuite trip: "
+                                 << launch_pos << " (truck_order size: " << truck_order.size() << ")" << std::endl;
+                        }
                     }
                 }
             }
