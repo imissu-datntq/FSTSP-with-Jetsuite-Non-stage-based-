@@ -1039,7 +1039,9 @@ Result FSTSPSolver::RV_FSTSP_3_index(Config &cfg) const
 
         double c = cplex.getObjValue();
         double lowerBound = cplex.getBestObjValue();
-        double gap = round(cplex.getMIPRelativeGap() * 10000.0) / 100.0;
+        double gap = (c > 1e-10)
+                         ? round(std::abs(c - lowerBound) / c * 10000.0) / 100.0
+                         : 0.0;
         std::sort(drone_order.begin(), drone_order.end(), [](const std::vector<int> &a, const std::vector<int> &b)
                   { return a[0] < b[0]; });
         double solve_time = duration.count() / 1000.0;
@@ -1665,7 +1667,9 @@ Result FSTSPSolver::FSTSP_2index_with_JetSuite(Config &cfg) const
         // ==============================
         double c = cplex.getObjValue();
         double lb = cplex.getBestObjValue();
-        double gap = round(cplex.getMIPRelativeGap() * 10000.0) / 100.0;
+        double gap = (c > 1e-10)
+                         ? round(std::abs(c - lb) / c * 10000.0) / 100.0
+                         : 0.0;
 
         // If your Solution::write() assumes certain invariants, keep this structure:
         //   truck_order: order of nodes
@@ -2450,8 +2454,9 @@ Result FSTSPSolver::FSTSP_3indexNoStage_with_JetSuite(Config &cfg) const
         // ================= CREATE SOLUTION =================
         double obj = cplex.getObjValue();
         double lowerBound = cplex.getBestObjValue();
-        double gap =
-            round(cplex.getMIPRelativeGap() * 10000.0) / 100.0;
+        double gap = (obj > 1e-10)
+                         ? round(std::abs(obj - lowerBound) / obj * 10000.0) / 100.0
+                         : 0.0;
         double solve_time = duration.count() / 1000.0;
 
         Solution31 solution31(

@@ -151,21 +151,59 @@ void NielsInstance::read()
     std::string line;
     std::getline(fin, line);
     // // read restriction, if any
-    // if (line[0] == '#') {
-    //     while (true) {
-    //         if (line.empty()) {
-    //             std::getline(fin, line);
-    //             break;
-    //         }
-    //         std::vector<std::string> line_split = SplitStringWithDelimiter(line, " ");
-    //         if (line_split[0] == "#MAXFLY")
-    //             maxradius = std::stod(line_split[1]);
-    //         else if (line_split[0] == "#NOVISIT") {
-    //             no_visit.insert(std::stoi(line_split[1]));
-    //         }
-    //         std::getline(fin, line);
-    //     }
-    // }
+    if (!line.empty() && line[0] == '#')
+    {
+        while (true)
+        {
+            if (line.empty())
+            {
+                std::getline(fin, line);
+                break;
+            }
+
+            std::istringstream hdr(line);
+            std::string key, value;
+            hdr >> key >> value;
+
+            if (key == "#MAXFLY" && !value.empty())
+            {
+                if (value == "Infinity" || value == "INF" || value == "inf")
+                    maxradius = INFINITY;
+                else
+                {
+                    try
+                    {
+                        maxradius = std::stod(value);
+                    }
+                    catch (...)
+                    {
+                        if (value.back() == '\r')
+                        {
+                            value.pop_back();
+                            maxradius = std::stod(value);
+                        }
+                    }
+                }
+            }
+            else if (key == "#NOVISIT" && !value.empty())
+            {
+                try
+                {
+                    no_visit.insert(std::stoi(value));
+                }
+                catch (...)
+                {
+                    if (value.back() == '\r')
+                    {
+                        value.pop_back();
+                        no_visit.insert(std::stoi(value));
+                    }
+                }
+            }
+
+            std::getline(fin, line);
+        }
+    }
     // keep the previous implementation
     std::getline(fin, line);
     truck_speed_factor = std::stod(line);

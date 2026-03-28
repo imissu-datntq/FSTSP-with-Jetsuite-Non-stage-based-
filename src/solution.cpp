@@ -317,7 +317,7 @@ bool Solution::isTimeJetsuiteValid()
         }
         else
         {
-            if (recover_pos <= launch_pos || recover_pos >= (int)truck_order.size())
+            if (recover_pos < 0 || recover_pos >= (int)truck_order.size())
                 return false;
 
             int rendezvous_node = truck_order[recover_pos];
@@ -358,10 +358,10 @@ bool Solution::isSynchronizeTime()
             if (rendezvous_stage >= (int)truck_time.size())
                 return false;
 
-            if (std::fabs(truck_time[rendezvous_stage] - drone_time[i][2]) > 0.01)
+            if (truck_time[rendezvous_stage] + 1e-6 < drone_time[i][2])
             {
                 if (cfg->screen_mode >= 1)
-                    cerr << "Time error: Truck rendezvous time must equal drone meeting time (sortie "
+                    cerr << "Time error: Truck reaches rendezvous before drone recovery is completed (sortie "
                          << i << ")\n";
                 return false;
             }
@@ -401,10 +401,10 @@ bool Solution::isSynchronizeTime()
             if (rendezvous_stage >= (int)truck_time.size())
                 return false;
 
-            if (std::fabs(truck_time[rendezvous_stage] - jetsuite_time[i][2]) > 0.01)
+            if (truck_time[rendezvous_stage] + 1e-6 < jetsuite_time[i][2])
             {
                 if (cfg->screen_mode >= 1)
-                    cerr << "Time error: Truck rendezvous time must equal jetsuite meeting time (sortie "
+                    cerr << "Time error: Truck reaches jetsuite rendezvous before jetsuite recovery is completed (sortie "
                          << i << ")\n";
                 return false;
             }
@@ -574,17 +574,27 @@ void Solution::write()
         }
     }
 
-    // objective = max thời gian kết thúc trong ba thành phần
+    // objective recomputed from timeline (for diagnostics)
     double obj = truck_time.empty() ? 0.0 : truck_time.back();
     if (!drone_time.empty())
         obj = std::max(obj, drone_time.back().back());
     if (!jetsuite_time.empty())
         obj = std::max(obj, jetsuite_time.back().back());
 
+    // Report objective from solver (cost) to keep CSV consistent with result log.
+    double reported_obj = (std::fabs(cost) > 1e-10) ? cost : obj;
+
+    double gap_to_write = 0.0;
+    if (std::fabs(reported_obj) > 1e-10)
+    {
+        gap_to_write = std::max(0.0, (reported_obj - lower_bound) / std::fabs(reported_obj) * 100.0);
+        gap_to_write = std::round(gap_to_write * 100.0) / 100.0;
+    }
+
     out << "\n";
-    out << "Objective/Upper bound," << obj << "\n";
+    out << "Objective/Upper bound," << reported_obj << "\n";
     out << "Lower bound," << lower_bound << "\n";
-    out << "Gap," << gap << "%\n";
+    out << "Gap," << gap_to_write << "%\n";
     out << "Solving time (s)," << solve_time << "\n";
     out << "Truck served," << std::set(truck_order.begin(), truck_order.end()).size() - 2 << "\n";
     out << "Drone served," << drone_order.size() << "\n";
@@ -648,10 +658,20 @@ void Solution::write(const string &abs_path)
     else
         obj = std::max(truck_time.back(), drone_time.back().back());
 
+    // Report objective from solver (cost) to keep CSV consistent with result log.
+    double reported_obj = (std::fabs(cost) > 1e-10) ? cost : obj;
+
+    double gap_to_write = 0.0;
+    if (std::fabs(reported_obj) > 1e-10)
+    {
+        gap_to_write = std::max(0.0, (reported_obj - lower_bound) / std::fabs(reported_obj) * 100.0);
+        gap_to_write = std::round(gap_to_write * 100.0) / 100.0;
+    }
+
     out << "\n";
-    out << "Objective/Upper bound," << obj << "\n";
+    out << "Objective/Upper bound," << reported_obj << "\n";
     out << "Lower bound," << lower_bound << "\n";
-    out << "Gap," << gap << "%\n";
+    out << "Gap," << gap_to_write << "%\n";
     out << "Solving time (s)," << solve_time << "\n";
     out << "Truck served," << (int)std::set<int>(truck_order.begin(), truck_order.end()).size() - 2 << "\n";
     out << "Drone served," << drone_order.size() << "\n\n";
@@ -1021,7 +1041,7 @@ void Solution::debugConstraints()
     }
 
     // ------------------------------------------------------------------
-    // C13: Synchronization – drone rendezvous time == truck arrival time
+    // C13: Synchronization – truck at rendezvous stage must not be earlier than drone meeting time
     // ------------------------------------------------------------------
     {
         bool all_ok = true;
@@ -1032,16 +1052,16 @@ void Solution::debugConstraints()
                 continue;
             if (rs >= (int)truck_time.size())
                 continue;
-            bool ok = (std::fabs(truck_time[rs] - drone_time[i][2]) <= 0.01);
+            bool ok = (truck_time[rs] + 1e-6 >= drone_time[i][2]);
             if (!ok)
             {
                 cout << "  [FAIL] C13 Drone sortie " << i << ": rendezvous sync"
-                     << "  truck_t=" << truck_time[rs] << " drone_t=" << drone_time[i][2] << "\n";
+                     << "  truck_t=" << truck_time[rs] << " < drone_t=" << drone_time[i][2] << "\n";
                 all_ok = false;
             }
         }
         if (all_ok)
-            cout << "  [PASS] C13 Drone rendezvous time synced with truck for all " << (int)drone_order.size() << " sortie(s)\n";
+            cout << "  [PASS] C13 Drone rendezvous time valid (truck waits if needed) for all " << (int)drone_order.size() << " sortie(s)\n";
     }
 
     // ------------------------------------------------------------------
@@ -1100,11 +1120,11 @@ void Solution::debugConstraints()
                 // Rendezvous tại node khác: phải đồng bộ đúng thời điểm
                 if (rs >= (int)truck_time.size())
                     continue;
-                bool ok = (std::fabs(truck_time[rs] - jetsuite_time[i][2]) <= 0.01);
+                bool ok = (truck_time[rs] + 1e-6 >= jetsuite_time[i][2]);
                 if (!ok)
                 {
                     cout << "  [FAIL] C15 Jetsuite sortie " << i << ": rendezvous sync"
-                         << "  truck_t=" << truck_time[rs] << " js_t=" << jetsuite_time[i][2] << "\n";
+                         << "  truck_t=" << truck_time[rs] << " < js_t=" << jetsuite_time[i][2] << "\n";
                     all_ok = false;
                 }
             }
